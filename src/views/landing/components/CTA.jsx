@@ -1,25 +1,29 @@
-import ctaImg from '@/assets/images/landing-cta.jpg'
+import Icon from '@/components/wrappers/Icon'
+import { Container } from 'react-bootstrap'
 import { Link } from 'react-router'
+import { handleAnchorClick } from '../utils/smoothScroll'
+import MotionSection from './MotionSection'
+
 const CTA = () => {
   return (
-    <section>
-      <div
-        className="section-cta position-relative card-side-img overflow-hidden"
-        style={{
-          backgroundImage: `url(${ctaImg})`,
-        }}
-      >
-        <div className="card-img-overlay d-flex align-items-center flex-column gap-3 justify-content-center auth-overlay text-center">
-          <h3 className="text-white fs-24 mb-0 fw-bold">Power Your Project with Our Premium Admin Dashboard</h3>
-          <p className="text-white text-opacity-75 fs-md">
-            Launch faster with a sleek, responsive, and developer-focused admin panel. <br /> Get started today — free 14-day trial, no credit card required.
-          </p>
-          <Link to="" className="btn btn-light rounded-pill">
-            Get Started Now
+    <MotionSection className="velorak-cta" id="cta">
+      <Container className="text-center py-5 position-relative">
+        <h2 className="fw-bold mb-3 velorak-cta__title">Ready to subscribe and run the company from one place?</h2>
+        <p className="mb-4 mx-auto velorak-cta__lead">
+          Start free today — upgrade to Basic, Plus, or Pro when you need more seats and fuller cost tracking.
+        </p>
+        <div className="d-flex flex-wrap justify-content-center gap-2">
+          <Link to="/auth/sign-up" className="btn btn-lg fw-semibold px-4 velorak-btn-primary">
+            Start free
+            <Icon icon="arrow-right" className="ms-1" />
           </Link>
+          <a href="#plans" className="btn btn-lg fw-semibold px-4 velorak-btn-ghost" onClick={(event) => handleAnchorClick(event, '#plans')}>
+            Compare plans
+          </a>
         </div>
-      </div>
-    </section>
+      </Container>
+    </MotionSection>
   )
 }
+
 export default CTA

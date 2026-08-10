@@ -1,37 +1,47 @@
-import logo from '@/assets/images/logo.png'
 import { currentYear } from '@/config/constants'
-import { Icon as IconifyIcon } from '@iconify/react'
 import { Col, Container, Row } from 'react-bootstrap'
 import { Link } from 'react-router'
-import { footerLinks, socialLinks } from './data'
+import { handleAnchorClick } from '../utils/smoothScroll'
+import { footerLinks } from './data'
+
 const Footer = () => {
   return (
-    <footer className="section-custom section-footer pb-2">
+    <footer className="section-footer velorak-footer py-5">
       <Container>
         <Row className="g-4 justify-content-between">
-          <Col lg={3}>
-            <img src={logo} alt="logo" height={24} />
-            <p className="mt-3 fs-sm">UBold is a best-selling admin dashboard template on ThemeForest, recognized for its clean design, versatility, and robust features. Create modern, responsive web applications effortlessly with this top-tier solution!</p>
-            <div className="d-flex gap-2 mt-4 mb-2">
-              {socialLinks.map((link, idx) => (
-                <Link to={link.url} className="btn btn-sm btn-icon rounded-circle btn-dark" title={link.title} key={idx}>
-                  <IconifyIcon icon={link.icon} className="fs-sm" />
-                </Link>
-              ))}
-            </div>
+          <Col lg={4}>
+            <Link to="/landing" className="velorak-brand d-inline-block mb-3">
+              Velorak
+            </Link>
+            <p className="mb-0 fs-sm">
+              Company project delivery and cost tracking — projects, features, tasks, time logs, and budgets in one place.
+            </p>
           </Col>
-          <Col lg={8} xxl={7}>
+          <Col lg={7}>
             <Row className="g-4">
-              {footerLinks.map((section, index) => (
-                <Col key={index} xs={6} md={4}>
-                  <h5 className="text-white mb-4 ps-2">{section.title}</h5>
+              {footerLinks.map((section) => (
+                <Col key={section.title} xs={6} md={4}>
+                  <h5 className="text-white mb-3">{section.title}</h5>
                   <ul className="nav flex-column">
-                    {section.links.map((link, i) => (
-                      <li className="nav-item" key={i}>
-                        <Link to={link.url} className={`nav-link ${i === 0 && 'pt-0'}`}>
-                          {link.name}
-                          {link.badge && <span className={`ms-2 badge text-bg-${link.badge.variant}`}>{link.badge.title}</span>}
-                        </Link>
+                    {section.links.map((link) => (
+                      <li className="nav-item" key={link.name}>
+                        {link.url.startsWith('mailto:') ? (
+                          <a href={link.url} className="nav-link px-0">
+                            {link.name}
+                          </a>
+                        ) : link.url.startsWith('#') ? (
+                          <a
+                            href={link.url}
+                            className="nav-link px-0"
+                            onClick={(event) => handleAnchorClick(event, link.url)}
+                          >
+                            {link.name}
+                          </a>
+                        ) : (
+                          <Link to={link.url} className="nav-link px-0">
+                            {link.name}
+                          </Link>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -42,13 +52,12 @@ const Footer = () => {
         </Row>
         <Row className="mt-5">
           <Col xs={12} className="text-center">
-            <p className="mb-4">
-              © {currentYear} UBold By <span className="fw-semibold">Coderthemes</span>
-            </p>
+            <p className="mb-0">© {currentYear} Velorak</p>
           </Col>
         </Row>
       </Container>
     </footer>
   )
 }
+
 export default Footer

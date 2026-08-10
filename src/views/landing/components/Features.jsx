@@ -1,79 +1,46 @@
-import { CountUp } from '@/components/wrappers/CountUp'
+import Icon from '@/components/wrappers/Icon'
+import { motion, useReducedMotion } from 'framer-motion'
 import { Col, Container, Row } from 'react-bootstrap'
-import { Link } from 'react-router'
-import { stats1, stats2 } from './data'
+import { featureData } from './data'
+import MotionSection, { MotionItem, staggerContainer } from './MotionSection'
+
 const Features = () => {
+  const reduce = useReducedMotion()
+
   return (
-    <section className="section-custom bg-light bg-opacity-30 border-top border-light border-bottom" id="features">
+    <MotionSection className="section-custom velorak-section velorak-section--features" id="features">
       <Container>
-        <Row>
-          <Col xs={12} className="text-center">
-            <span className="text-muted rounded-3 d-inline-block">🚀 Designed for Performance & Scalability</span>
-            <h2 className="mt-3 fw-bold mb-5">
-              Discover the Core <span className="text-primary">Features</span> of UBold
-            </h2>
+        <Row className="mb-4 mb-lg-5 align-items-end">
+          <Col lg={8}>
+            <h2 className="velorak-section__title mb-3">Everything from delivery to cost</h2>
+            <p className="velorak-section__lead mb-0">
+              Velorak connects the work your team ships with the money it costs — so a subscription pays for clarity, not another spreadsheet.
+            </p>
           </Col>
         </Row>
-        <Row className="align-items-center pb-5">
-          <Col lg={6} xl={5} className="py-3">
-            <div className="text-center">
-              <img src="https://illustrations.popsy.co/violet/paper-plane.svg" className="rounded-3 img-fluid" width={530} height={530} alt="saas-img" />
-              <small className="fst-italic">
-                Image by:{' '}
-                <Link to="https://popsy.co/illustrations" target="_blank">
-                  Popsy.co
-                </Link>
-              </small>
-            </div>
-          </Col>
-          <Col lg={5} className="ms-auto py-3">
-            <h3 className="mb-3 fs-xl lh-base">Powering Smart Admin Experiences with UBold</h3>
-            <p className="mb-2 lead">UBold is a feature-rich, high-performance admin dashboard template built for modern web applications and enterprise-grade interfaces.</p>
-            <p className="text-muted fs-sm mb-4">Streamline your workflow, monitor key metrics, and manage data seamlessly with intuitive UI and powerful components.</p>
-            <Link to="" className="btn btn-primary mb-4">
-              Launch Dashboard
-            </Link>
-            <div className="d-flex flex-wrap justify-content-between gap-4 mt-4">
-              {stats1.map((state, idx) => (
-                <div key={idx}>
-                  <h3 className="mb-2">
-                    <CountUp start={0} end={state.value} decimals={Number.isInteger(state.value) ? 0 : 2} duration={1} />
-                    <span className="text-primary">{state.suffix}</span>
-                  </h3>
-                  <p className="text-muted mb-0">{state.label}</p>
+
+        <motion.div
+          className="velorak-bento"
+          initial={reduce ? false : 'hidden'}
+          whileInView="show"
+          viewport={{ once: true, amount: 0.12 }}
+          variants={reduce ? undefined : staggerContainer}
+        >
+          {featureData.map((feature, index) => (
+            <MotionItem key={feature.title} className={index === 0 ? 'velorak-feature--hero-wrap' : undefined}>
+              <article className={`velorak-feature ${index === 0 ? 'velorak-feature--hero' : ''}`}>
+                <div className="velorak-feature__icon" aria-hidden="true">
+                  <Icon icon={feature.icon} className="fs-3" />
                 </div>
-              ))}
-            </div>
-          </Col>
-        </Row>
-        <Row className="align-items-center py-5">
-          <Col lg={5} className="py-3 order-2 order-lg-1">
-            <h2 className="mb-3 fs-xl lh-base">Control Everything from One Unified Dashboard</h2>
-            <p className="mb-2 lead">UBold empowers admins with a smart, responsive interface to manage users, analytics, content, and workflows effortlessly.</p>
-            <p className="text-muted fs-sm mb-4">Track performance, automate tasks, and make data-driven decisions — all from a secure and scalable admin panel.</p>
-            <Link to="/" className="btn btn-primary mb-4">
-              Explore UBold Admin
-            </Link>
-            <div className="d-flex flex-wrap gap-4 mt-4">
-              {stats2.map((state, idx) => (
-                <div key={idx}>
-                  <h3 className="mb-2">
-                    <CountUp start={0} end={state.value} decimals={Number.isInteger(state.value) ? 0 : 2} duration={1} />
-                    <span className="text-primary">{state.suffix}</span>
-                  </h3>
-                  <p className="text-muted mb-0">{state.label}</p>
-                </div>
-              ))}
-            </div>
-          </Col>
-          <Col lg={6} xl={5} className="ms-auto py-3 order-1 order-lg-2">
-            <div className="text-center">
-              <img src="https://illustrations.popsy.co/violet/success.svg" className="rounded-3 img-fluid" width={530} height={530} alt="saas-img" />
-            </div>
-          </Col>
-        </Row>
+                <h3 className="velorak-feature__title h5 mb-2">{feature.title}</h3>
+                <p className="velorak-feature__text mb-0">{feature.description}</p>
+              </article>
+            </MotionItem>
+          ))}
+        </motion.div>
       </Container>
-    </section>
+    </MotionSection>
   )
 }
+
 export default Features

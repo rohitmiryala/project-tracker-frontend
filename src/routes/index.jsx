@@ -684,6 +684,10 @@ export const routes = [
     Component: lazy(() => import('@/views/auth/basic/login-pin')),
   },
   {
+    path: '/auth/checkout',
+    Component: lazy(() => import('@/views/auth/basic/checkout')),
+  },
+  {
     path: '/auth/new-pass',
     Component: lazy(() => import('@/views/auth/basic/new-pass')),
   },

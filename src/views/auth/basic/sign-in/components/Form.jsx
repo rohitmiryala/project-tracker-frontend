@@ -1,37 +1,65 @@
 import { useAuth } from '@/hooks/useAuth'
 import { useState } from 'react'
-import { Button, Form, FormCheck, FormControl, FormLabel } from 'react-bootstrap'
-import { Link } from 'react-router'
+import { Alert, Button, Form, FormCheck, FormControl, FormLabel } from 'react-bootstrap'
+import { Link, useLocation } from 'react-router'
+
 const LoginForm = () => {
-  const { login, loading, error } = useAuth()
+  const { login, loading, error, setError } = useAuth()
+  const location = useLocation()
   const [form, setForm] = useState({
-    email: 'admin@example.com',
-    password: 'password',
+    email: '',
+    password: '',
   })
+  const successMessage = location.state?.message
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setForm((prev) => ({
       ...prev,
       [name]: value,
     }))
+    setError?.(null)
   }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    await login(form.email, form.password)
+    try {
+      await login(form.email.trim(), form.password)
+    } catch {
+      // error via useAuth
+    }
   }
+
   return (
     <form onSubmit={handleSubmit}>
+      {successMessage && <Alert variant="success" className="py-2">{successMessage}</Alert>}
       <div className="mb-3">
         <FormLabel>
           Email address <span className="text-danger">*</span>
         </FormLabel>
-        <FormControl type="email" placeholder="you@example.com" value={form.email} required onChange={handleChange} />
+        <FormControl
+          type="email"
+          name="email"
+          placeholder="you@example.com"
+          value={form.email}
+          required
+          onChange={handleChange}
+          autoComplete="email"
+        />
       </div>
       <div className="mb-3">
         <FormLabel>
           Password <span className="text-danger">*</span>
         </FormLabel>
-        <FormControl type="password" placeholder="••••••••" value={form.password} required onChange={handleChange} />
+        <FormControl
+          type="password"
+          name="password"
+          placeholder="••••••••"
+          value={form.password}
+          required
+          onChange={handleChange}
+          autoComplete="current-password"
+        />
       </div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <FormCheck>
@@ -42,13 +70,14 @@ const LoginForm = () => {
           Forgot Password?
         </Link>
       </div>
-      {error && <p className="text-danger">{error}</p>}
+      {error && <Alert variant="danger" className="py-2">{error}</Alert>}
       <div className="d-grid">
         <Button variant="primary" type="submit" className="fw-semibold py-2" disabled={loading}>
-          Sign In
+          {loading ? 'Signing in…' : 'Sign In'}
         </Button>
       </div>
     </form>
   )
 }
+
 export default LoginForm

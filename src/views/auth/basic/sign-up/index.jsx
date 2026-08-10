@@ -4,25 +4,23 @@ import { currentYear, META_DATA } from '@/config/constants'
 import { Card, Col, Container, Row } from 'react-bootstrap'
 import { Link } from 'react-router'
 import Forms from './components/Forms'
+
 const Page = () => {
   return (
     <>
-      <div className="auth-box overflow-hidden align-items-center d-flex">
+      <div className="auth-box overflow-hidden align-items-center d-flex py-4">
         <Container>
           <Row className="justify-content-center">
-            <Col xxl={4} md={6} sm={8}>
-              <Card className="p-4">
-                <div
-                  className="position-absolute top-0 end-0"
-                  style={{
-                    width: '180px',
-                  }}
-                >
-                  <img src={cardbg} className="auth-card-bg-img" alt="auth-card-bg" />
+            <Col xxl={7} xl={8} lg={9} md={10}>
+              <Card className="p-4 p-md-4">
+                <div className="position-absolute top-0 end-0" style={{ width: '180px' }}>
+                  <img src={cardbg} className="auth-card-bg-img" alt="" />
                 </div>
-                <div className="auth-brand text-center mb-4">
+                <div className="auth-brand text-center mb-3">
                   <AuthLogo />
-                  <p className="text-muted w-lg-75 mx-auto mt-3">Let&apos;s get you started. Create your account by entering your details below.</p>
+                  <p className="text-muted mx-auto mt-3 mb-0" style={{ maxWidth: '36rem' }}>
+                    Create your company account in two steps — basics first, then pick a plan.
+                  </p>
                 </div>
                 <Forms />
                 <p className="text-muted text-center mt-4 mb-0">
@@ -42,4 +40,5 @@ const Page = () => {
     </>
   )
 }
+
 export default Page

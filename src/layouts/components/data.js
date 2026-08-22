@@ -12,6 +12,12 @@ export const menuItems = [
         'label': 'Dashboard',
       },
       {
+        'url': '/app/clients',
+        'icon': 'building-2',
+        'slug': 'pages:velorak-clients',
+        'label': 'Clients',
+      },
+      {
         'url': '/app/projects',
         'icon': 'folder-kanban',
         'slug': 'pages:velorak-projects',

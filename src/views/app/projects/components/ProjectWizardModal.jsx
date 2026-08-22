@@ -52,10 +52,10 @@ const WizardHeader = () => {
       <ProgressBar now={((activeStep + 1) / stepCount) * 100} className="mb-3" style={{ height: 6 }} />
       <ul className="nav nav-tabs wizard-tabs mb-3" role="tablist">
         {steps.map((step, idx) => (
-          <li className="nav-item" key={step.title}>
+          <li className="nav-item flex-fill" key={step.title}>
             <button
               type="button"
-              className={clsx('nav-link', activeStep === idx && 'active', activeStep > idx && 'wizard-item-done')}
+              className={clsx('nav-link w-100 text-center', activeStep === idx && 'active', activeStep > idx && 'wizard-item-done')}
               onClick={() => goToStep(idx)}
             >
               <span className="fw-semibold">{step.title}</span>
@@ -469,7 +469,7 @@ const ProjectWizardModal = ({ show, onHide, projectId, onSaved }) => {
   })
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" backdrop={false} keyboard={false} centered scrollable>
+    <Modal show={show} onHide={onHide} size="lg" backdrop="static" keyboard={false} centered scrollable>
       <FormProvider {...methods}>
         <Form onSubmit={onSubmit}>
           <Modal.Header closeButton>

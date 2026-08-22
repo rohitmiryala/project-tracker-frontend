@@ -31,6 +31,11 @@
 // Modal Backdrop
 .modal-backdrop {
     backdrop-filter: blur(6px);
+    background-color: rgba(0, 0, 0, 0.6);
+
+    &.show {
+        opacity: 1;
+    }
 }
 
 // Modal Animation

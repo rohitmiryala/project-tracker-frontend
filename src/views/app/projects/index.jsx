@@ -34,7 +34,6 @@ const Page = () => {
   const { showNotification } = useNotificationContext()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
-  const [progress, setProgress] = useState('all')
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
@@ -46,7 +45,6 @@ const Page = () => {
       const json = await projectService.list({
         search: query.trim() || undefined,
         status,
-        progress,
         limit: 50,
       })
       setProjects(json?.data || [])
@@ -55,7 +53,7 @@ const Page = () => {
     } finally {
       setLoading(false)
     }
-  }, [query, status, progress])
+  }, [query, showNotification, status])
 
   useEffect(() => {
     const timer = setTimeout(loadProjects, 250)
@@ -98,33 +96,28 @@ const Page = () => {
     <>
       <PageBreadcrumb title="Projects" subtitle="Velorak" />
 
-      <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
-        <div className="app-search">
-          <FormControl
-            type="search"
-            placeholder="Search projects..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <Icon icon="search" className="app-search-icon text-muted" />
+      <div className="d-flex align-items-center justify-content-between gap-2 mb-3">
+        <div className="d-flex align-items-center gap-2">
+          <div className="app-search" style={{ width: 260 }}>
+            <FormControl
+              type="search"
+              placeholder="Search projects..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <Icon icon="search" className="app-search-icon text-muted" />
+          </div>
+          <FormSelect style={{ width: 160 }} value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="all">All statuses</option>
+            {PROJECT_STATUSES.map((item) => (
+              <option key={item.value} value={item.value}>
+                {item.label}
+              </option>
+            ))}
+          </FormSelect>
         </div>
-        <FormSelect className="w-auto" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="all">All statuses</option>
-          {PROJECT_STATUSES.map((item) => (
-            <option key={item.value} value={item.value}>
-              {item.label}
-            </option>
-          ))}
-        </FormSelect>
-        <FormSelect className="w-auto" value={progress} onChange={(e) => setProgress(e.target.value)}>
-          <option value="all">All progress</option>
-          <option value="0-25">0–25%</option>
-          <option value="25-50">25–50%</option>
-          <option value="50-75">50–75%</option>
-          <option value="75-100">75–100%</option>
-        </FormSelect>
-        <Button variant="primary" className="ms-auto" onClick={openCreate}>
-          <Icon icon="plus" className="me-1" /> Create project
+        <Button variant="primary" className="text-nowrap" onClick={openCreate}>
+          <Icon icon="plus" className="me-1" /> Create Project
         </Button>
       </div>
 

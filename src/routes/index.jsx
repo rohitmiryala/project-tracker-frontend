@@ -18,6 +18,10 @@ export const routes = [
         Component: lazy(() => import('@/views/app/projects')),
       },
       {
+        path: '/app/clients',
+        Component: lazy(() => import('@/views/app/clients')),
+      },
+      {
         path: '/app/tasks',
         Component: lazy(() => import('@/views/app/tasks')),
       },

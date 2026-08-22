@@ -4,8 +4,16 @@ import { META_DATA } from '@/config/constants'
 import { useAuth } from '@/hooks/useAuth'
 import { Dropdown, DropdownDivider, DropdownHeader, DropdownItem, DropdownMenu, DropdownToggle } from 'react-bootstrap'
 import { Link } from 'react-router'
+
+const getUserDisplayName = (user) => {
+  const name = user?.name || user?.fullName || [user?.firstName, user?.lastName].filter(Boolean).join(' ')
+  return name || user?.email || META_DATA.username
+}
+
 const UserDropdown = () => {
   const { logout } = useAuth()
+  const { user } = useAuth();
+  const userDisplayName = getUserDisplayName(user);
 
   const handleLogout = (e) => {
     e.preventDefault()
@@ -18,7 +26,7 @@ const UserDropdown = () => {
         <DropdownToggle className="topbar-link drop-arrow-none" type="button">
           <img src={User1} width={32} className="rounded-circle me-lg-2 d-flex" alt="user-image" />
           <div className="d-lg-flex align-items-center gap-1 d-none">
-            <h5 className="my-0">{META_DATA.username}</h5>
+            <h5 className="my-0">{userDisplayName}</h5>
             <Icon icon="chevron-down" className="align-middle" />
           </div>
         </DropdownToggle>

@@ -1,6 +1,85 @@
 export const menuItems = [
   {
     'icon': 'layout-dashboard',
+    'slug': 'velorak',
+    'label': 'Velorak',
+    'isTitle': true,
+    'children': [
+      {
+        'url': '/app/dashboard',
+        'icon': 'layout-dashboard',
+        'slug': 'pages:velorak-dashboard',
+        'label': 'Dashboard',
+      },
+      {
+        'url': '/app/projects',
+        'icon': 'folder-kanban',
+        'slug': 'pages:velorak-projects',
+        'label': 'Projects',
+      },
+      {
+        'url': '/app/tasks',
+        'icon': 'square-kanban',
+        'slug': 'pages:velorak-tasks',
+        'label': 'Tasks',
+      },
+      {
+        'url': '/app/calendar',
+        'icon': 'calendar',
+        'slug': 'pages:velorak-calendar',
+        'label': 'Calendar',
+      },
+      {
+        'url': '/app/cost-tracking',
+        'icon': 'wallet',
+        'slug': 'pages:velorak-cost-tracking',
+        'label': 'Cost Tracking',
+      },
+      {
+        'url': '/app/reports',
+        'icon': 'chart-column',
+        'slug': 'pages:velorak-reports',
+        'label': 'Reports',
+      },
+      {
+        'url': '/app/profile',
+        'icon': 'user-round',
+        'slug': 'pages:velorak-profile',
+        'label': 'Profile',
+      },
+      {
+        'url': '/app/subscription',
+        'icon': 'credit-card',
+        'slug': 'pages:velorak-subscription',
+        'label': 'Subscription',
+      },
+      {
+        'url': '/app/settings',
+        'icon': 'settings',
+        'slug': 'pages:velorak-settings',
+        'label': 'Settings',
+      },
+      {
+        'url': '/app/chat',
+        'icon': 'message-circle',
+        'slug': 'pages:velorak-chat',
+        'label': 'Chat',
+        'badge': {
+          'text': 'Soon',
+          'className': 'bg-warning text-dark',
+        },
+      },
+      {
+        'action': 'logout',
+        'icon': 'log-out',
+        'slug': 'pages:velorak-logout',
+        'label': 'Logout',
+        'isSpecial': true,
+      },
+    ],
+  },
+  {
+    'icon': 'layout-dashboard',
     'slug': 'main',
     'label': 'Main',
     'isTitle': true,

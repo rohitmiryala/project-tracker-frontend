@@ -1,10 +1,24 @@
 import Icon from '@/components/wrappers/Icon'
+import { useAuth } from '@/hooks/useAuth'
 import { menuItems } from '@/layouts/components/data'
 import { scrollToElement } from '@/utils/layout'
 import clsx from 'clsx'
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { Collapse } from 'react-bootstrap'
 import { Link, useLocation } from 'react-router'
+
+const MenuItemContent = ({ item, isTopLevel }) => (
+  <>
+    {item.icon && isTopLevel && (
+      <span className="menu-icon">
+        <Icon icon={item.icon} />
+      </span>
+    )}
+    <span className="menu-text">{item.label}</span>
+    {item.badge && <span className={clsx('badge', item.badge.className)}>{item.badge.text}</span>}
+  </>
+)
+
 const MenuItemWithChildren = ({ item, openMenuKey, setOpenMenuKey, level = 0 }) => {
   const pathname = useLocation().pathname
   const isTopLevel = level === 0
@@ -60,18 +74,32 @@ const MenuItemWithChildren = ({ item, openMenuKey, setOpenMenuKey, level = 0 }) 
 }
 const MenuItem = ({ item, level = 0 }) => {
   const pathname = useLocation().pathname
+  const { logout } = useAuth()
   const isTopLevel = level === 0
   const isActive = item.url && pathname.startsWith(item.url)
+  const className = clsx('side-nav-link', isActive && 'active', item.isDisabled && 'disabled', item.isSpecial && 'special-menu')
+
+  if (item.action === 'logout') {
+    return (
+      <li className="side-nav-item">
+        <a
+          href="#logout"
+          className={className}
+          onClick={(e) => {
+            e.preventDefault()
+            logout()
+          }}
+        >
+          <MenuItemContent item={item} isTopLevel={isTopLevel} />
+        </a>
+      </li>
+    )
+  }
+
   return (
     <li className={clsx('side-nav-item', isActive && 'active')}>
-      <Link to={item.url ?? '/'} className={clsx('side-nav-link', isActive && 'active', item.isDisabled && 'disabled', item.isSpecial && 'special-menu')}>
-        {item.icon && isTopLevel && (
-          <span className="menu-icon">
-            <Icon icon={item.icon} />
-          </span>
-        )}
-        <span className="menu-text">{item.label}</span>
-        {item.badge && <span className={clsx('badge', item.badge.className)}>{item.badge.text}</span>}
+      <Link to={item.url ?? '/'} className={className}>
+        <MenuItemContent item={item} isTopLevel={isTopLevel} />
       </Link>
     </li>
   )

@@ -96,6 +96,7 @@
     "sweetalert2": "^11.26.24",
     "sweetalert2-react-content": "^5.1.2",
     "usehooks-ts": "^3.1.1",
-    "yup": "^1.7.1"
+    "yup": "^1.7.1",
+    "zod": "^4.4.3"
   }
 }

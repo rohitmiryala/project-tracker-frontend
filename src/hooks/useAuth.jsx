@@ -8,8 +8,10 @@ import {
   setPendingPayment,
 } from '@/lib/apiClient'
 import { authService } from '@/services/authService'
-import { useCallback, useMemo, useState } from 'react'
+import { createContext, use, useCallback, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
+
+const AuthContext = createContext(undefined)
 
 const applyAuthResult = (data) => {
   if (!data?.accessToken) return data
@@ -34,7 +36,7 @@ const applyAuthResult = (data) => {
   return data
 }
 
-export const useAuth = () => {
+export const AuthProvider = ({ children }) => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -60,7 +62,7 @@ export const useAuth = () => {
           return data
         }
 
-        navigate('/', { replace: true })
+        navigate('/app/dashboard', { replace: true })
         return data
       } catch (err) {
         setError(err.message || 'Login failed')
@@ -86,7 +88,7 @@ export const useAuth = () => {
           return data
         }
 
-        navigate('/', { replace: true })
+        navigate('/app/dashboard', { replace: true })
         return data
       } catch (err) {
         setError(err.message || 'Registration failed')
@@ -107,7 +109,7 @@ export const useAuth = () => {
         applyAuthResult({ ...json?.data, requiresPayment: false })
         setPendingPayment(null)
         syncFromStorage()
-        navigate('/', { replace: true })
+        navigate('/app/dashboard', { replace: true })
         return json?.data
       } catch (err) {
         setError(err.message || 'Payment confirmation failed')
@@ -134,17 +136,41 @@ export const useAuth = () => {
   const isAuthenticated = Boolean(token)
   const pendingPayment = useMemo(() => getPendingPayment(), [token, user])
 
-  return {
-    login,
-    register,
-    confirmPayment,
-    logout,
-    isAuthenticated,
-    loading,
-    error,
-    setError,
-    user,
-    pendingPayment,
-    syncFromStorage,
+  const value = useMemo(
+    () => ({
+      login,
+      register,
+      confirmPayment,
+      logout,
+      isAuthenticated,
+      loading,
+      error,
+      setError,
+      user,
+      pendingPayment,
+      syncFromStorage,
+    }),
+    [
+      login,
+      register,
+      confirmPayment,
+      logout,
+      isAuthenticated,
+      loading,
+      error,
+      user,
+      pendingPayment,
+      syncFromStorage,
+    ]
+  )
+
+  return <AuthContext value={value}>{children}</AuthContext>
+}
+
+export const useAuth = () => {
+  const context = use(AuthContext)
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider')
   }
+  return context
 }

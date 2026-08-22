@@ -14,12 +14,24 @@ export const sessionKeys = {
   RESET_TOKEN_KEY,
 }
 
-export const getAccessToken = () => sessionStorage.getItem(TOKEN_KEY)
-export const getRefreshToken = () => sessionStorage.getItem(REFRESH_KEY)
+const getStoredItem = (key) => localStorage.getItem(key) || sessionStorage.getItem(key)
+
+const setStoredItem = (key, value) => {
+  localStorage.setItem(key, value)
+  sessionStorage.removeItem(key)
+}
+
+const removeStoredItem = (key) => {
+  localStorage.removeItem(key)
+  sessionStorage.removeItem(key)
+}
+
+export const getAccessToken = () => getStoredItem(TOKEN_KEY)
+export const getRefreshToken = () => getStoredItem(REFRESH_KEY)
 
 export const getStoredUser = () => {
   try {
-    const raw = sessionStorage.getItem(USER_KEY)
+    const raw = getStoredItem(USER_KEY)
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
@@ -27,29 +39,29 @@ export const getStoredUser = () => {
 }
 
 export const persistAuthSession = ({ accessToken, refreshToken, user } = {}) => {
-  if (accessToken) sessionStorage.setItem(TOKEN_KEY, accessToken)
-  if (refreshToken) sessionStorage.setItem(REFRESH_KEY, refreshToken)
-  if (user) sessionStorage.setItem(USER_KEY, JSON.stringify(user))
+  if (accessToken) setStoredItem(TOKEN_KEY, accessToken)
+  if (refreshToken) setStoredItem(REFRESH_KEY, refreshToken)
+  if (user) setStoredItem(USER_KEY, JSON.stringify(user))
 }
 
 export const clearAuthSession = () => {
-  sessionStorage.removeItem(TOKEN_KEY)
-  sessionStorage.removeItem(REFRESH_KEY)
-  sessionStorage.removeItem(USER_KEY)
-  sessionStorage.removeItem(PENDING_PAYMENT_KEY)
+  removeStoredItem(TOKEN_KEY)
+  removeStoredItem(REFRESH_KEY)
+  removeStoredItem(USER_KEY)
+  removeStoredItem(PENDING_PAYMENT_KEY)
 }
 
 export const setPendingPayment = (payload) => {
   if (!payload) {
-    sessionStorage.removeItem(PENDING_PAYMENT_KEY)
+    removeStoredItem(PENDING_PAYMENT_KEY)
     return
   }
-  sessionStorage.setItem(PENDING_PAYMENT_KEY, JSON.stringify(payload))
+  setStoredItem(PENDING_PAYMENT_KEY, JSON.stringify(payload))
 }
 
 export const getPendingPayment = () => {
   try {
-    const raw = sessionStorage.getItem(PENDING_PAYMENT_KEY)
+    const raw = getStoredItem(PENDING_PAYMENT_KEY)
     return raw ? JSON.parse(raw) : null
   } catch {
     return null

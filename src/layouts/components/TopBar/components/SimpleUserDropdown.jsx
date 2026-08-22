@@ -1,8 +1,17 @@
 import User1 from '@/assets/images/users/user-1.jpg'
 import Icon from '@/components/wrappers/Icon'
 import { META_DATA } from '@/config/constants'
+import { useAuth } from '@/hooks/useAuth'
 import { Dropdown, DropdownDivider, DropdownHeader, DropdownItem, DropdownMenu, DropdownToggle } from 'react-bootstrap'
+import { Link } from 'react-router'
 const UserDropdown = () => {
+  const { logout } = useAuth()
+
+  const handleLogout = (e) => {
+    e.preventDefault()
+    logout()
+  }
+
   return (
     <div id="simple-user-dropdown" className="topbar-item nav-user">
       <Dropdown>
@@ -18,43 +27,26 @@ const UserDropdown = () => {
             <h6 className="text-overflow m-0">Welcome back!</h6>
           </DropdownHeader>
 
-          <DropdownItem href="">
+          <DropdownItem as={Link} to="/app/profile">
             <Icon icon="circle-user-round" className="me-1 fs-lg align-middle" />
             <span className="align-middle">Profile</span>
           </DropdownItem>
 
-          <DropdownItem href="">
-            <Icon icon="bell-ring" className="me-1 fs-lg align-middle" />
-            <span className="align-middle">Notifications</span>
-          </DropdownItem>
-
-          <DropdownItem href="">
-            <Icon icon="credit-card" className="me-1 fs-lg align-middle" />
-            <span className="align-middle">
-              Balance: <span className="fw-semibold">$985.25</span>
-            </span>
-          </DropdownItem>
-
-          <DropdownItem href="">
+          <DropdownItem as={Link} to="/app/settings">
             <Icon icon="bolt" className="me-1 fs-lg align-middle" />
             <span className="align-middle">Account Settings</span>
           </DropdownItem>
 
-          <DropdownItem href="">
+          <DropdownItem as={Link} to="/pages/faq">
             <Icon icon="headset" className="me-1 fs-lg align-middle" />
             <span className="align-middle">Support Center</span>
           </DropdownItem>
 
           <DropdownDivider />
 
-          <DropdownItem href="/auth/lock-screen">
-            <Icon icon="lock-keyhole" className="me-1 fs-lg align-middle" />
-            <span className="align-middle">Lock Screen</span>
-          </DropdownItem>
-
-          <DropdownItem href="" className="text-danger fw-semibold">
+          <DropdownItem href="#logout" className="text-danger fw-semibold" onClick={handleLogout}>
             <Icon icon="log-out" className="me-1 fs-lg align-middle" />
-            <span className="align-middle">Log Out</span>
+            <span className="align-middle">Logout</span>
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>

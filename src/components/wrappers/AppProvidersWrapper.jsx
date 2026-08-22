@@ -1,7 +1,7 @@
 import { getPendingPayment } from '@/lib/apiClient'
 import { LayoutProvider } from '@/context/useLayoutContext'
 import { NotificationProvider } from '@/context/useNotificationContext'
-import { useAuth } from '@/hooks/useAuth'
+import { AuthProvider, useAuth } from '@/hooks/useAuth'
 import { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 
@@ -10,7 +10,7 @@ const PUBLIC_PREFIXES = ['/auth', '/landing', '/error']
 const isPublicPath = (pathname) =>
   PUBLIC_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
 
-const AppProvidersWrapper = ({ children }) => {
+const AppGate = ({ children }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { isAuthenticated } = useAuth()
@@ -42,5 +42,11 @@ const AppProvidersWrapper = ({ children }) => {
     </LayoutProvider>
   )
 }
+
+const AppProvidersWrapper = ({ children }) => (
+  <AuthProvider>
+    <AppGate>{children}</AppGate>
+  </AuthProvider>
+)
 
 export default AppProvidersWrapper

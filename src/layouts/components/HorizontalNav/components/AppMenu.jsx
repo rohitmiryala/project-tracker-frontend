@@ -1,4 +1,5 @@
 import Icon from '@/components/wrappers/Icon'
+import { useAuth } from '@/hooks/useAuth'
 import { menuItems } from '@/layouts/components/data'
 import clsx from 'clsx'
 import { Fragment, useState } from 'react'
@@ -74,8 +75,22 @@ const MenuItemWithChildren = ({ item, wrapperClass, togglerClass, level }) => {
 const MenuItem = ({ item, linkClass, wrapperClass, level }) => {
   const menuLevel = level ?? 1
   const pathname = useLocation().pathname
+  const { logout } = useAuth()
   const isActive = item.url && pathname.endsWith(item.url)
-  const link = (
+  const handleLogout = (e) => {
+    e.preventDefault()
+    logout()
+  }
+  const link = item.action === 'logout' ? (
+    <a href="#logout" className={linkClass} onClick={handleLogout}>
+      {item.icon && menuLevel < 2 && (
+        <span className="menu-icon">
+          <Icon icon={item.icon} />
+        </span>
+      )}
+      <span className="menu-text">{item.label}</span>
+    </a>
+  ) : (
     <Link
       to={item.url ?? '/'}
       className={clsx(linkClass, {

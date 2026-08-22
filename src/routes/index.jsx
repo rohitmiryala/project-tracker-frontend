@@ -4,11 +4,51 @@ import { Navigate } from 'react-router'
 export const routes = [
   {
     path: '',
-    element: <Navigate to="/dashboard/ecommerce" />,
+    element: <Navigate to="/app/dashboard" />,
   },
   {
     element: <MainLayout />,
     children: [
+      {
+        path: '/app/dashboard',
+        Component: lazy(() => import('@/views/app/dashboard')),
+      },
+      {
+        path: '/app/projects',
+        Component: lazy(() => import('@/views/app/projects')),
+      },
+      {
+        path: '/app/tasks',
+        Component: lazy(() => import('@/views/app/tasks')),
+      },
+      {
+        path: '/app/calendar',
+        Component: lazy(() => import('@/views/app/calendar')),
+      },
+      {
+        path: '/app/cost-tracking',
+        Component: lazy(() => import('@/views/app/cost-tracking')),
+      },
+      {
+        path: '/app/reports',
+        Component: lazy(() => import('@/views/app/reports')),
+      },
+      {
+        path: '/app/profile',
+        Component: lazy(() => import('@/views/app/profile')),
+      },
+      {
+        path: '/app/subscription',
+        Component: lazy(() => import('@/views/app/subscription')),
+      },
+      {
+        path: '/app/settings',
+        Component: lazy(() => import('@/views/app/settings')),
+      },
+      {
+        path: '/app/chat',
+        Component: lazy(() => import('@/views/app/chat')),
+      },
       {
         path: '/apps/api-keys',
         Component: lazy(() => import('@/views/admin/apps/api-keys')),

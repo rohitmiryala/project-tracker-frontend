@@ -66,6 +66,10 @@ export const routes = [
         Component: lazy(() => import('@/views/app/clients')),
       },
       {
+        path: '/app/roles',
+        Component: lazy(() => import('@/views/app/roles')),
+      },
+      {
         path: '/app/calendar',
         Component: lazy(() => import('@/views/app/calendar')),
       },

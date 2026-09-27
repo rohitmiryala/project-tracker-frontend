@@ -1,6 +1,7 @@
 import Icon from '@/components/wrappers/Icon'
 import { useAuth } from '@/hooks/useAuth'
 import { productMenuItems } from '@/layouts/components/data'
+import { filterMenuItems } from '@/utils/permissions'
 import { scrollToElement } from '@/utils/layout'
 import clsx from 'clsx'
 import { Fragment, useEffect, useState } from 'react'
@@ -100,7 +101,9 @@ const MenuItem = ({ item, level = 0 }) => {
   )
 }
 const AppMenu = () => {
+  const { user } = useAuth()
   const [openMenuKey, setOpenMenuKey] = useState(null)
+  const visibleMenuItems = filterMenuItems(productMenuItems, user)
   const scrollToActiveLink = () => {
     const activeItem = document.querySelector('.side-nav-link.active')
     if (activeItem) {
@@ -116,7 +119,7 @@ const AppMenu = () => {
   }, [])
   return (
     <ul className="side-nav">
-      {productMenuItems.map((item, idx) => (
+      {visibleMenuItems.map((item, idx) => (
         <Fragment key={idx}>
           {item.isTitle && <li className="side-nav-title mt-2">{item.label}</li>}
           {(item.children || [item]).map((item, idx) => (

@@ -68,17 +68,21 @@ export const getPendingPayment = () => {
   }
 }
 
-const parseErrorMessage = async (response) => {
+const parseErrorResponse = async (response) => {
   try {
     const data = await response.json()
-    if (data?.message) return data.message
-    if (data?.errorSources?.[0]?.message) return data.errorSources[0].message
-    if (data?.errorMessages?.[0]?.message) return data.errorMessages[0].message
-    if (typeof data?.error === 'string') return data.error
+    return {
+      message:
+        data?.message ||
+        data?.errorSources?.[0]?.message ||
+        data?.errorMessages?.[0]?.message ||
+        (typeof data?.error === 'string' ? data.error : `Request failed (${response.status})`),
+      errorSources: data?.errorSources || data?.errorMessages || [],
+      status: response.status,
+    }
   } catch {
-    // ignore
+    return { message: `Request failed (${response.status})`, errorSources: [], status: response.status }
   }
-  return `Request failed (${response.status})`
 }
 
 let refreshPromise = null
@@ -152,7 +156,11 @@ export const apiRequest = async (path, { method = 'GET', body, auth = false, hea
   }
 
   if (!response.ok) {
-    throw new Error(await parseErrorMessage(response))
+    const details = await parseErrorResponse(response)
+    const error = new Error(details.message)
+    error.status = details.status
+    error.errorSources = details.errorSources
+    throw error
   }
 
   if (response.status === 204) return null

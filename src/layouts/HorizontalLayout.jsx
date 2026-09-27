@@ -9,7 +9,7 @@ const HorizontalLayout = ({ children }) => {
       <ResponsiveNav />
       <div className="content-page">
         <Container fluid>{children}</Container>
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </div>
   )

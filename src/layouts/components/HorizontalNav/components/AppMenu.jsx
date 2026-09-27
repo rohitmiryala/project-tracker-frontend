@@ -1,6 +1,7 @@
 import Icon from '@/components/wrappers/Icon'
 import { useAuth } from '@/hooks/useAuth'
 import { productMenuItems } from '@/layouts/components/data'
+import { filterMenuItems } from '@/utils/permissions'
 import clsx from 'clsx'
 import { Fragment, useState } from 'react'
 import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap'
@@ -119,9 +120,11 @@ const MenuItem = ({ item, linkClass, wrapperClass, level }) => {
   )
 }
 const AppMenu = () => {
+  const { user } = useAuth()
+  const visibleMenuItems = filterMenuItems(productMenuItems, user)
   return (
     <ul className="navbar-nav">
-      {productMenuItems.map((item, idx) => (
+      {visibleMenuItems.map((item, idx) => (
         <Fragment key={idx}>{item.children ? <MenuItemWithChildren item={item} wrapperClass="nav-item" togglerClass="nav-link" /> : <MenuItem item={item} linkClass="nav-link" wrapperClass="nav-item" />}</Fragment>
       ))}
     </ul>

@@ -7,6 +7,17 @@ export const productMenuItems = [
       { url: '/app/my-work', icon: 'circle-check-big', slug: 'product-my-work', label: 'My Work' },
       { url: '/app/projects', icon: 'folder-kanban', slug: 'product-projects', label: 'Projects' },
       { url: '/app/clients', icon: 'building-2', slug: 'product-clients', label: 'Clients' },
+      {
+        url: '/app/roles',
+        icon: 'users-round',
+        slug: 'product-roles',
+        label: 'Roles',
+        permissions: [
+          ['userManagement', 'view'],
+          ['userManagement', 'invite'],
+          ['userManagement', 'changeRole'],
+        ],
+      },
       { url: '/app/calendar', icon: 'calendar', slug: 'product-calendar', label: 'Calendar' },
       { url: '/app/reports', icon: 'chart-column', slug: 'product-reports', label: 'Reports' },
       { url: '/app/settings', icon: 'settings', slug: 'product-settings', label: 'Settings' },

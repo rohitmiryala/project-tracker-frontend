@@ -8,6 +8,13 @@ export const productMenuItems = [
       { url: '/app/projects', icon: 'folder-kanban', slug: 'product-projects', label: 'Projects' },
       { url: '/app/clients', icon: 'building-2', slug: 'product-clients', label: 'Clients' },
       {
+        url: '/app/users',
+        icon: 'users',
+        slug: 'product-users',
+        label: 'Users',
+        permissions: [['userManagement', 'view']],
+      },
+      {
         url: '/app/roles',
         icon: 'users-round',
         slug: 'product-roles',

@@ -70,6 +70,26 @@ export const routes = [
         Component: lazy(() => import('@/views/app/roles')),
       },
       {
+        path: '/app/users',
+        Component: lazy(() => import('@/views/app/users')),
+      },
+      {
+        path: '/app/users/new',
+        Component: lazy(() => import('@/views/app/users/UserFormPage')),
+      },
+      {
+        path: '/app/users/bulk',
+        Component: lazy(() => import('@/views/app/users/BulkUsersPage')),
+      },
+      {
+        path: '/app/users/:userId',
+        Component: lazy(() => import('@/views/app/users/UserDetailsPage')),
+      },
+      {
+        path: '/app/users/:userId/edit',
+        Component: lazy(() => import('@/views/app/users/UserFormPage')),
+      },
+      {
         path: '/app/calendar',
         Component: lazy(() => import('@/views/app/calendar')),
       },

@@ -10,11 +10,11 @@ const withQuery = (path, params = {}) => {
 }
 
 export const projectService = {
-  list: (params) => apiRequest(withQuery('/project', params), { auth: true }),
-  getById: (id) => apiRequest(`/project/${id}`, { auth: true }),
-  create: (payload) => apiRequest('/project', { method: 'POST', body: payload, auth: true }),
-  update: (id, payload) => apiRequest(`/project/${id}`, { method: 'PATCH', body: payload, auth: true }),
-  archive: (id) => apiRequest(`/project/${id}/archive`, { method: 'PATCH', auth: true }),
-  remove: (id) => apiRequest(`/project/${id}`, { method: 'DELETE', auth: true }),
-  assignableMembers: () => apiRequest('/project/assignable-members', { auth: true }),
+  list: (params) => apiRequest(withQuery('/projects', params), { auth: true }),
+  getById: (id) => apiRequest(`/projects/${id}`, { auth: true }),
+  create: (payload) => apiRequest('/projects', { method: 'POST', body: payload, auth: true }),
+  update: (id, payload) => apiRequest(`/projects/${id}`, { method: 'PATCH', body: payload, auth: true }),
+  archive: (id, version) => apiRequest(`/projects/${id}/archive`, { method: 'PATCH', body: { version }, auth: true }),
+  remove: (id, version) => apiRequest(`/projects/${id}`, { method: 'DELETE', body: { version }, auth: true }),
+  assignableMembers: () => apiRequest('/projects/assignable-members', { auth: true }),
 }

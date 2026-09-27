@@ -42,10 +42,10 @@ const FieldTip = ({ text }) => (
 const WizardHeader = () => {
   const { activeStep, stepCount, goToStep } = useWizard()
   const steps = [
-    { title: 'Basics', hint: 'Name and client' },
-    { title: 'Schedule', hint: 'Start and end' },
+    { title: 'Basics', hint: 'Scope and dates' },
     { title: 'Team', hint: 'Leads and members' },
-    { title: 'More', hint: 'Tags and notes' },
+    { title: 'Planning', hint: 'Flow and labels' },
+    { title: 'Commercial', hint: 'Budget and billing' },
   ]
   return (
     <>
@@ -121,6 +121,22 @@ const StepBasics = ({ clients, onQuickAddClient, addingClient }) => {
         <FormLabel>Description</FormLabel>
         <FormControl as="textarea" rows={3} {...register('description')} placeholder="What is this project delivering?" />
       </Form.Group>
+      <Row>
+        <Col md={6}>
+          <Form.Group className="mb-3">
+            <FormLabel>Start date <span className="text-danger">*</span></FormLabel>
+            <FormControl type="date" {...register('startDate')} isInvalid={Boolean(errors.startDate)} />
+            <Form.Control.Feedback type="invalid">{errors.startDate?.message}</Form.Control.Feedback>
+          </Form.Group>
+        </Col>
+        <Col md={6}>
+          <Form.Group className="mb-3">
+            <FormLabel>Estimated end date <span className="text-danger">*</span></FormLabel>
+            <FormControl type="date" {...register('estimatedEndDate')} isInvalid={Boolean(errors.estimatedEndDate)} />
+            <Form.Control.Feedback type="invalid">{errors.estimatedEndDate?.message}</Form.Control.Feedback>
+          </Form.Group>
+        </Col>
+      </Row>
       <Form.Group className="mb-3">
         <FormLabel>
           Client <span className="text-danger">*</span>
@@ -171,17 +187,16 @@ const StepBasics = ({ clients, onQuickAddClient, addingClient }) => {
   )
 }
 
-const StepSchedule = () => {
+const StepPlanning = () => {
   const { previousStep, nextStep } = useWizard()
   const {
     register,
     getValues,
     setError,
-    formState: { errors },
   } = useFormContext()
 
   const goNext = () => {
-    const parsed = stepSchemas[1].safeParse(getValues())
+    const parsed = stepSchemas[2].safeParse(getValues())
     if (!parsed.success) {
       parsed.error.issues.forEach((issue) => {
         setError(issue.path[0], { message: issue.message })
@@ -193,28 +208,17 @@ const StepSchedule = () => {
 
   return (
     <div className="pt-1">
-      <Row>
-        <Col md={6}>
-          <Form.Group className="mb-3">
-            <FormLabel>
-              Start date <span className="text-danger">*</span>
-              <FieldTip text="Kickoff date. Used for timelines and deadline risk." />
-            </FormLabel>
-            <FormControl type="date" {...register('startDate')} isInvalid={Boolean(errors.startDate)} />
-            <Form.Control.Feedback type="invalid">{errors.startDate?.message}</Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-        <Col md={6}>
-          <Form.Group className="mb-3">
-            <FormLabel>
-              Estimated end date <span className="text-danger">*</span>
-              <FieldTip text="Target delivery date. Must be after start date. Used to flag delayed projects." />
-            </FormLabel>
-            <FormControl type="date" {...register('estimatedEndDate')} isInvalid={Boolean(errors.estimatedEndDate)} />
-            <Form.Control.Feedback type="invalid">{errors.estimatedEndDate?.message}</Form.Control.Feedback>
-          </Form.Group>
-        </Col>
-      </Row>
+      <Form.Group className="mb-3">
+        <FormLabel>Planning style</FormLabel>
+        <div className="d-grid gap-2">
+          <Form.Check type="radio" value="continuous" {...register('planningMode')} label="Continuous flow — move work whenever it is ready" />
+          <Form.Check type="radio" value="cycles" {...register('planningMode')} label="Cycles — plan Deliverables into fixed working periods" />
+        </div>
+      </Form.Group>
+      <Form.Group className="mb-3">
+        <FormLabel>Tags</FormLabel>
+        <FormControl {...register('tagsText')} placeholder="web, mobile, priority-client" />
+      </Form.Group>
       <div className="d-flex justify-content-between">
         <Button type="button" variant="light" onClick={previousStep}>
           Back
@@ -235,7 +239,7 @@ const StepTeam = ({ members }) => {
   const teamError = formState.errors.assignedEmployees
 
   const goNext = () => {
-    const parsed = stepSchemas[2].safeParse(getValues())
+    const parsed = stepSchemas[1].safeParse(getValues())
     if (!parsed.success) {
       parsed.error.issues.forEach((issue) => {
         setError(issue.path[0] || 'assignedEmployees', { message: issue.message })
@@ -351,13 +355,26 @@ const StepMore = ({ saving, isEdit }) => {
 
   return (
     <div className="pt-1">
-      <Form.Group className="mb-3">
-        <FormLabel>
-          Tags
-          <FieldTip text="Optional labels for filtering, comma-separated. Example: web, react, high-priority. They do not affect cost." />
-        </FormLabel>
-        <FormControl {...register('tagsText')} placeholder="web, react, high-priority" />
-      </Form.Group>
+      <Row>
+        <Col md={4}>
+          <Form.Group className="mb-3">
+            <FormLabel>Billing model</FormLabel>
+            <FormSelect {...register('budgetType')}><option value="fixed">Fixed price</option><option value="hourly">Hourly</option></FormSelect>
+          </Form.Group>
+        </Col>
+        <Col md={4}>
+          <Form.Group className="mb-3">
+            <FormLabel>Internal budget</FormLabel>
+            <FormControl type="number" min="0" step="0.01" {...register('estimatedBudget')} isInvalid={Boolean(errors.estimatedBudget)} />
+          </Form.Group>
+        </Col>
+        <Col md={4}>
+          <Form.Group className="mb-3">
+            <FormLabel>Client billing</FormLabel>
+            <FormControl type="number" min="0" step="0.01" {...register('billingAmount')} isInvalid={Boolean(errors.billingAmount)} />
+          </Form.Group>
+        </Col>
+      </Row>
       <Form.Group className="mb-3">
         <FormLabel>
           Notes
@@ -452,14 +469,15 @@ const ProjectWizardModal = ({ show, onHide, projectId, onSaved }) => {
       if (isEdit) {
         await projectService.update(projectId, payload)
       } else {
-        await projectService.create(payload)
+        const created = await projectService.create(payload)
+        onSaved?.(created?.data)
       }
       showNotification({
         title: 'Project',
         message: isEdit ? 'Project updated' : 'Project created',
         variant: 'success',
       })
-      onSaved?.()
+      if (isEdit) onSaved?.()
       onHide()
     } catch (err) {
       showNotification({ title: 'Project', message: err.message || 'Save failed', variant: 'danger' })
@@ -485,8 +503,8 @@ const ProjectWizardModal = ({ show, onHide, projectId, onSaved }) => {
             {!loading && !loadError && (
               <Wizard header={<WizardHeader />}>
                 <StepBasics clients={clients} onQuickAddClient={handleQuickAddClient} addingClient={addingClient} />
-                <StepSchedule />
                 <StepTeam members={members} />
+                <StepPlanning />
                 <StepMore saving={saving} isEdit={isEdit} />
               </Wizard>
             )}

@@ -125,12 +125,11 @@ const refreshAccessToken = async () => {
  */
 export const apiRequest = async (path, { method = 'GET', body, auth = false, headers = {} } = {}) => {
   const url = `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
 
   const buildHeaders = (token) => {
-    const next = {
-      'Content-Type': 'application/json',
-      ...headers,
-    }
+    const next = { ...headers }
+    if (!isFormData) next['Content-Type'] = 'application/json'
     if (auth && token) next.Authorization = `Bearer ${token}`
     return next
   }
@@ -140,7 +139,7 @@ export const apiRequest = async (path, { method = 'GET', body, auth = false, hea
       method,
       credentials: 'include',
       headers: buildHeaders(token),
-      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      ...(body !== undefined ? { body: isFormData ? body : JSON.stringify(body) } : {}),
     })
 
   let response = await doFetch(auth ? getAccessToken() : null)

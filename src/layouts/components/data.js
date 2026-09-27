@@ -1,3 +1,19 @@
+export const productMenuItems = [
+  {
+    label: 'Workspace',
+    isTitle: true,
+    children: [
+      { url: '/app/dashboard', icon: 'layout-dashboard', slug: 'product-dashboard', label: 'Dashboard' },
+      { url: '/app/my-work', icon: 'circle-check-big', slug: 'product-my-work', label: 'My Work' },
+      { url: '/app/projects', icon: 'folder-kanban', slug: 'product-projects', label: 'Projects' },
+      { url: '/app/clients', icon: 'building-2', slug: 'product-clients', label: 'Clients' },
+      { url: '/app/calendar', icon: 'calendar', slug: 'product-calendar', label: 'Calendar' },
+      { url: '/app/reports', icon: 'chart-column', slug: 'product-reports', label: 'Reports' },
+      { url: '/app/settings', icon: 'settings', slug: 'product-settings', label: 'Settings' },
+    ],
+  },
+]
+
 export const menuItems = [
   {
     'icon': 'layout-dashboard',
@@ -24,10 +40,10 @@ export const menuItems = [
         'label': 'Projects',
       },
       {
-        'url': '/app/tasks',
+        'url': '/app/my-work',
         'icon': 'square-kanban',
         'slug': 'pages:velorak-tasks',
-        'label': 'Tasks',
+        'label': 'My Work',
       },
       {
         'url': '/app/calendar',

@@ -2,7 +2,7 @@ export const META_DATA = {
   name: 'Velorak',
   title: 'Velorak — Project delivery and cost tracking for companies',
   description:
-    'Velorak helps companies run projects, features, tasks, time logs, and budgets in one place — with roles, seats, and clear cost visibility.',
+    'Velorak helps companies run projects, deliverables, tasks, cycles, time logs, and budgets in one place — with roles, seats, and clear cost visibility.',
   author: 'Velorak',
   username: 'Velorak',
   keywords:

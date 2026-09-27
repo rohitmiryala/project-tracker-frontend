@@ -3,6 +3,7 @@ import Icon from '@/components/wrappers/Icon'
 import { useNotificationContext } from '@/context/useNotificationContext'
 import { projectService } from '@/services/projectService'
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router'
 import {
   Button,
   Card,
@@ -31,6 +32,7 @@ const statusClass = {
 const statusLabel = (status) => PROJECT_STATUSES.find((item) => item.value === status)?.label || status
 
 const Page = () => {
+  const navigate = useNavigate()
   const { showNotification } = useNotificationContext()
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('all')
@@ -70,10 +72,10 @@ const Page = () => {
     setModalOpen(true)
   }
 
-  const handleArchive = async (id) => {
+  const handleArchive = async (id, version) => {
     if (!window.confirm('Archive this project? It will be marked cancelled.')) return
     try {
-      await projectService.archive(id)
+      await projectService.archive(id, version)
       showNotification({ title: 'Projects', message: 'Project archived', variant: 'success' })
       loadProjects()
     } catch (err) {
@@ -81,10 +83,10 @@ const Page = () => {
     }
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, version) => {
     if (!window.confirm('Delete this project? This hides it from the list.')) return
     try {
-      await projectService.remove(id)
+      await projectService.remove(id, version)
       showNotification({ title: 'Projects', message: 'Project deleted', variant: 'success' })
       loadProjects()
     } catch (err) {
@@ -133,22 +135,23 @@ const Page = () => {
         {!loading &&
           projects.map((project) => (
             <Col xl={4} md={6} key={project.id}>
-              <Card className="h-100">
+              <Card className="h-100 project-card" role="button" tabIndex={0} onClick={() => navigate(`/app/projects/${project.id}/overview`)} onKeyDown={(event) => event.key === 'Enter' && navigate(`/app/projects/${project.id}/overview`)}>
                 <CardBody>
                   <div className="d-flex justify-content-between align-items-start mb-2">
                     <div>
+                      <div className="text-uppercase text-muted fs-xxs fw-semibold mb-1">{project.key}</div>
                       <h5 className="mb-1">{project.name}</h5>
                       <span className={`badge ${statusClass[project.status] || 'bg-light'}`}>{statusLabel(project.status)}</span>
                     </div>
-                    <Dropdown align="end">
+                    <Dropdown align="end" onClick={(event) => event.stopPropagation()}>
                       <DropdownToggle as="button" className="btn btn-sm btn-soft-secondary drop-arrow-none">
                         <Icon icon="ellipsis" />
                       </DropdownToggle>
                       <DropdownMenu>
-                        <DropdownItem disabled>View project</DropdownItem>
+                        <DropdownItem onClick={() => navigate(`/app/projects/${project.id}/overview`)}>View project</DropdownItem>
                         <DropdownItem onClick={() => openEdit(project.id)}>Edit project</DropdownItem>
-                        <DropdownItem onClick={() => handleArchive(project.id)}>Archive project</DropdownItem>
-                        <DropdownItem className="text-danger" onClick={() => handleDelete(project.id)}>
+                        <DropdownItem onClick={() => handleArchive(project.id, project.version)}>Archive project</DropdownItem>
+                        <DropdownItem className="text-danger" onClick={() => handleDelete(project.id, project.version)}>
                           Delete project
                         </DropdownItem>
                       </DropdownMenu>
@@ -180,7 +183,7 @@ const Page = () => {
         show={modalOpen}
         projectId={editId}
         onHide={() => setModalOpen(false)}
-        onSaved={loadProjects}
+        onSaved={(created) => created?.id ? navigate(`/app/projects/${created.id}/overview`) : loadProjects()}
       />
     </>
   )

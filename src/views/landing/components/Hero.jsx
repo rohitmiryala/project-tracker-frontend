@@ -6,7 +6,7 @@ import { Link } from 'react-router'
 import { handleAnchorClick } from '../utils/smoothScroll'
 import { mechanismSteps } from './data'
 
-const pipeline = ['Projects', 'Features', 'Tasks', 'Time', 'Cost']
+const pipeline = ['Projects', 'Deliverables', 'Tasks', 'Time', 'Cost']
 
 const demoRows = [
   { name: 'Acme Redesign', progress: 72, cost: '₹1.8L', status: 'On track' },
@@ -52,7 +52,7 @@ const Hero = () => {
               Project delivery and cost — finally in one subscription
             </motion.h1>
             <motion.p className="velorak-hero__lead mb-4" {...motionProps(0.14)}>
-              Create your company, invite seats, and track projects, features, tasks, time, and budgets without leaving Velorak.
+              Create your company, invite seats, and track projects, deliverables, tasks, time, and budgets without leaving Velorak.
             </motion.p>
             <motion.div className="d-flex flex-wrap gap-2 mb-3" {...motionProps(0.2)}>
               <Link to="/auth/sign-up" className="btn btn-lg fw-semibold px-4 velorak-btn-primary">

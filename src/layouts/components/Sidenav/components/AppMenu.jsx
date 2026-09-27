@@ -1,9 +1,9 @@
 import Icon from '@/components/wrappers/Icon'
 import { useAuth } from '@/hooks/useAuth'
-import { menuItems } from '@/layouts/components/data'
+import { productMenuItems } from '@/layouts/components/data'
 import { scrollToElement } from '@/utils/layout'
 import clsx from 'clsx'
-import { Fragment, useCallback, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Collapse } from 'react-bootstrap'
 import { Link, useLocation } from 'react-router'
 
@@ -19,24 +19,19 @@ const MenuItemContent = ({ item, isTopLevel }) => (
   </>
 )
 
+const hasActiveChild = (children = [], pathname) =>
+  children.some(
+    (child) =>
+      (child.url && pathname.startsWith(child.url)) ||
+      (child.children && hasActiveChild(child.children, pathname)),
+  )
+
 const MenuItemWithChildren = ({ item, openMenuKey, setOpenMenuKey, level = 0 }) => {
   const pathname = useLocation().pathname
   const isTopLevel = level === 0
   const [localOpen, setLocalOpen] = useState(false)
-  const [didAutoOpen, setDidAutoOpen] = useState(false)
-  const isChildActive = useCallback((children = []) => children.some((child) => (child.url && pathname.startsWith(child.url)) || (child.children && isChildActive(child.children))), [pathname])
-  const isActive = (item.url && pathname.startsWith(item.url)) || isChildActive(item.children)
-  const isOpen = isTopLevel ? openMenuKey === item.slug : localOpen
-  useEffect(() => {
-    if (isActive && !didAutoOpen) {
-      if (isTopLevel) {
-        setOpenMenuKey(item.slug)
-      } else {
-        setLocalOpen(true)
-      }
-      setDidAutoOpen(true)
-    }
-  }, [isActive, didAutoOpen, isTopLevel, item.slug, setOpenMenuKey])
+  const isActive = (item.url && pathname.startsWith(item.url)) || hasActiveChild(item.children, pathname)
+  const isOpen = isActive || (isTopLevel ? openMenuKey === item.slug : localOpen)
   const toggleOpen = (e) => {
     if (item.children?.length) e.preventDefault()
     if (isTopLevel) {
@@ -121,7 +116,7 @@ const AppMenu = () => {
   }, [])
   return (
     <ul className="side-nav">
-      {menuItems.map((item, idx) => (
+      {productMenuItems.map((item, idx) => (
         <Fragment key={idx}>
           {item.isTitle && <li className="side-nav-title mt-2">{item.label}</li>}
           {(item.children || [item]).map((item, idx) => (

@@ -15,7 +15,7 @@ export const whyChooseData = [
     icon: 'layers',
     title: 'Delivery and cost live in one workspace',
     description:
-      'Stop jumping between a task tool and a spreadsheet. Velorak keeps projects, features, tasks, time, and budgets in the same company subscription so leaders see work and spend together.',
+      'Stop jumping between a task tool and a spreadsheet. Velorak keeps projects, deliverables, tasks, time, and budgets in the same company subscription so leaders see work and spend together.',
     points: [
       'Projects through cost in one product',
       'No export gymnastics for monthly reviews',
@@ -151,8 +151,8 @@ export const featureData = [
   },
   {
     icon: 'boxes',
-    title: 'Features',
-    description: 'Break projects into features so scope and ownership stay clear for the team.',
+    title: 'Deliverables',
+    description: 'Break projects into clear Deliverables so scope and ownership stay understandable for the team.',
   },
   {
     icon: 'columns-3',
@@ -200,7 +200,7 @@ export const howItWorks = [
   {
     step: '3',
     title: 'Track work and cost',
-    description: 'Ship features and tasks while time logs feed live budget visibility.',
+    description: 'Ship Deliverables and Tasks while time logs feed live budget visibility.',
   },
 ]
 
@@ -213,7 +213,7 @@ export const rolesData = [
   {
     icon: 'user-cog',
     title: 'Team Leader',
-    description: 'Runs projects and features, assigns work, and keeps delivery on schedule.',
+    description: 'Runs projects and Deliverables, assigns work, and keeps delivery on schedule.',
   },
   {
     icon: 'user',
@@ -238,7 +238,7 @@ export const screenshotSlots = [
     hint: 'Replace with tasks / Kanban screenshot',
     pathHint: 'src/assets/images/landing/tasks.png',
     description:
-      'Move features into day-to-day tasks with assignees, due dates, and status — the board your team actually works from.',
+      'Move Deliverables into day-to-day Tasks with assignees, due dates, and status — the board your team actually works from.',
     points: ['Kanban-style status flow', 'Assignees & due dates', 'Clear ownership'],
   },
   {
@@ -273,7 +273,7 @@ export const pricingData = [
     isPopular: false,
     features: [
       { title: '5 team seats', included: true },
-      { title: 'Projects, features & tasks', included: true },
+      { title: 'Projects, Deliverables & Tasks', included: true },
       { title: 'Time logs', included: true },
       { title: 'Basic cost view', included: true },
       { title: 'Priority support', included: false },
@@ -332,7 +332,7 @@ export const pricingData = [
 export const faqData = [
   {
     question: 'What is included in the Free plan?',
-    answer: 'Free includes 5 seats so you can create a company, invite a small team, and start tracking projects, features, tasks, and time. Paid plans unlock more seats and fuller cost tooling.',
+    answer: 'Free includes 5 seats so you can create a company, invite a small team, and start tracking projects, Deliverables, Tasks, and time. Paid plans unlock more seats and fuller cost tooling.',
   },
   {
     question: 'How do seats and invites work?',

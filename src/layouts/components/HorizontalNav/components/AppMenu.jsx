@@ -1,6 +1,6 @@
 import Icon from '@/components/wrappers/Icon'
 import { useAuth } from '@/hooks/useAuth'
-import { menuItems } from '@/layouts/components/data'
+import { productMenuItems } from '@/layouts/components/data'
 import clsx from 'clsx'
 import { Fragment, useState } from 'react'
 import { Dropdown, DropdownMenu, DropdownToggle } from 'react-bootstrap'
@@ -121,7 +121,7 @@ const MenuItem = ({ item, linkClass, wrapperClass, level }) => {
 const AppMenu = () => {
   return (
     <ul className="navbar-nav">
-      {menuItems.map((item, idx) => (
+      {productMenuItems.map((item, idx) => (
         <Fragment key={idx}>{item.children ? <MenuItemWithChildren item={item} wrapperClass="nav-item" togglerClass="nav-link" /> : <MenuItem item={item} linkClass="nav-link" wrapperClass="nav-item" />}</Fragment>
       ))}
     </ul>

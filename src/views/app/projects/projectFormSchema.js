@@ -26,6 +26,11 @@ export const projectFormSchema = z
     startDate: z.string().min(1, 'Start date is required'),
     estimatedEndDate: z.string().min(1, 'Estimated end date is required'),
     assignedEmployees: z.array(assignedEmployeeSchema).min(1, 'Assign at least one team member'),
+    planningMode: z.enum(['continuous', 'cycles']),
+    budgetType: z.enum(['fixed', 'hourly']),
+    estimatedBudget: z.coerce.number().min(0),
+    billingAmount: z.coerce.number().min(0),
+    version: z.coerce.number().int().min(1).optional(),
     tagsText: z.string().optional(),
     notes: z.string().trim().max(1000).optional().or(z.literal('')),
   })
@@ -60,44 +65,29 @@ export const stepSchemas = {
     description: z.string().trim().max(1000).optional().or(z.literal('')),
     clientId: z.string().min(1, 'Select a client'),
     status: z.enum(['active', 'on_hold', 'completed', 'cancelled']),
-  }),
-  1: z
-    .object({
-      startDate: z.string().min(1, 'Start date is required'),
-      estimatedEndDate: z.string().min(1, 'Estimated end date is required'),
-    })
-    .superRefine((data, ctx) => {
+    startDate: z.string().min(1, 'Start date is required'),
+    estimatedEndDate: z.string().min(1, 'Estimated end date is required'),
+  }).superRefine((data, ctx) => {
       if (data.startDate && data.estimatedEndDate && data.estimatedEndDate <= data.startDate) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Estimated end date must be after start date',
-          path: ['estimatedEndDate'],
-        })
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Estimated end date must be after start date', path: ['estimatedEndDate'] })
       }
     }),
-  2: z
-    .object({
-      assignedEmployees: z.array(assignedEmployeeSchema).min(1, 'Assign at least one team member'),
-    })
+  1: z
+    .object({ assignedEmployees: z.array(assignedEmployeeSchema).min(1, 'Assign at least one team member') })
     .superRefine((data, ctx) => {
       const ids = data.assignedEmployees.map((item) => item.employeeId)
       if (new Set(ids).size !== ids.length) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Each person can be assigned only once',
-          path: ['assignedEmployees'],
-        })
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Each person can be assigned only once', path: ['assignedEmployees'] })
       }
       if (!data.assignedEmployees.some((item) => item.projectRole === 'lead')) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Assign at least one project lead',
-          path: ['assignedEmployees'],
-        })
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Assign at least one project lead', path: ['assignedEmployees'] })
       }
     }),
+  2: z.object({ planningMode: z.enum(['continuous', 'cycles']), tagsText: z.string().optional() }),
   3: z.object({
-    tagsText: z.string().optional(),
+    budgetType: z.enum(['fixed', 'hourly']),
+    estimatedBudget: z.coerce.number().min(0),
+    billingAmount: z.coerce.number().min(0),
     notes: z.string().trim().max(1000).optional().or(z.literal('')),
   }),
 }
@@ -110,6 +100,11 @@ export const emptyProjectForm = {
   startDate: '',
   estimatedEndDate: '',
   assignedEmployees: [],
+  planningMode: 'continuous',
+  budgetType: 'fixed',
+  estimatedBudget: 0,
+  billingAmount: 0,
+  version: undefined,
   tagsText: '',
   notes: '',
 }
@@ -122,6 +117,11 @@ export const toApiPayload = (values) => ({
   startDate: values.startDate,
   estimatedEndDate: values.estimatedEndDate,
   assignedEmployees: values.assignedEmployees,
+  planningMode: values.planningMode,
+  budgetType: values.budgetType,
+  estimatedBudget: Number(values.estimatedBudget || 0),
+  billingAmount: Number(values.billingAmount || 0),
+  ...(values.version ? { version: values.version } : {}),
   tags: (values.tagsText || '')
     .split(',')
     .map((tag) => tag.trim())
@@ -147,6 +147,11 @@ export const fromProjectDetail = (project) => ({
     employeeId: entry.employeeId,
     projectRole: entry.projectRole || 'member',
   })),
+  planningMode: project.planningMode || 'continuous',
+  budgetType: project.budget?.budgetType || 'fixed',
+  estimatedBudget: project.budget?.estimatedBudget || 0,
+  billingAmount: project.budget?.billingAmount || 0,
+  version: project.version,
   tagsText: (project.tags || []).join(', '),
   notes: project.notes || '',
 })

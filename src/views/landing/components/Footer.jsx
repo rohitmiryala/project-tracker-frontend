@@ -14,7 +14,7 @@ const Footer = () => {
               Velorak
             </Link>
             <p className="mb-0 fs-sm">
-              Company project delivery and cost tracking — projects, features, tasks, time logs, and budgets in one place.
+              Company project delivery and cost tracking — projects, deliverables, tasks, time logs, and budgets in one place.
             </p>
           </Col>
           <Col lg={7}>

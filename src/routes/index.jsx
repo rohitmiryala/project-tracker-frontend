@@ -18,12 +18,52 @@ export const routes = [
         Component: lazy(() => import('@/views/app/projects')),
       },
       {
-        path: '/app/clients',
-        Component: lazy(() => import('@/views/app/clients')),
+        path: '/app/projects/:projectId/overview',
+        Component: lazy(() => import('@/views/app/project-workspace')),
       },
       {
-        path: '/app/tasks',
-        Component: lazy(() => import('@/views/app/tasks')),
+        path: '/app/projects/:projectId/work',
+        Component: lazy(() => import('@/views/app/project-workspace')),
+      },
+      {
+        path: '/app/projects/:projectId/cycles',
+        Component: lazy(() => import('@/views/app/project-workspace')),
+      },
+      {
+        path: '/app/projects/:projectId/cycles/:cycleId',
+        Component: lazy(() => import('@/views/app/project-workspace')),
+      },
+      {
+        path: '/app/projects/:projectId/issues',
+        Component: lazy(() => import('@/views/app/project-workspace')),
+      },
+      {
+        path: '/app/projects/:projectId/timeline',
+        Component: lazy(() => import('@/views/app/project-workspace')),
+      },
+      {
+        path: '/app/projects/:projectId/team',
+        Component: lazy(() => import('@/views/app/project-workspace')),
+      },
+      {
+        path: '/app/projects/:projectId/costs',
+        Component: lazy(() => import('@/views/app/project-workspace')),
+      },
+      {
+        path: '/app/projects/:projectId/activity',
+        Component: lazy(() => import('@/views/app/project-workspace')),
+      },
+      {
+        path: '/app/projects/:projectId/settings',
+        Component: lazy(() => import('@/views/app/project-workspace')),
+      },
+      {
+        path: '/app/my-work',
+        Component: lazy(() => import('@/views/app/my-work')),
+      },
+      {
+        path: '/app/clients',
+        Component: lazy(() => import('@/views/app/clients')),
       },
       {
         path: '/app/calendar',

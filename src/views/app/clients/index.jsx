@@ -2,22 +2,28 @@ import PageBreadcrumb from '@/components/PageBreadcrumb'
 import Icon from '@/components/wrappers/Icon'
 import { useNotificationContext } from '@/context/useNotificationContext'
 import { clientService } from '@/services/clientService'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Button,
   Card,
   CardBody,
+  CardFooter,
+  Col,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
   Form,
   FormControl,
+  FormSelect,
   Modal,
+  Row,
   Spinner,
   Table,
 } from 'react-bootstrap'
 import ClientModal from './components/ClientModal'
+
+const PAGE_SIZE_OPTIONS = [5, 10, 15, 25]
 
 const Page = () => {
   const { showNotification } = useNotificationContext()
@@ -30,6 +36,10 @@ const Page = () => {
   const [deleting, setDeleting] = useState(false)
   const [toggleTarget, setToggleTarget] = useState(null)
   const [toggling, setToggling] = useState(false)
+
+  // Pagination state
+  const [pageIndex, setPageIndex] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
 
   const loadClients = useCallback(async () => {
     setLoading(true)
@@ -46,6 +56,43 @@ const Page = () => {
   useEffect(() => {
     loadClients()
   }, [loadClients])
+
+  // Filter clients by search query
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return clients
+    return clients.filter(
+      (c) =>
+        c.name?.toLowerCase().includes(q) ||
+        c.contactPersonName?.toLowerCase().includes(q) ||
+        c.email?.toLowerCase().includes(q)
+    )
+  }, [clients, query])
+
+  // Reset to first page when search or data changes
+  useEffect(() => {
+    setPageIndex(0)
+  }, [query, clients])
+
+  // Pagination derived values
+  const totalItems = filtered.length
+  const pageCount = Math.max(1, Math.ceil(totalItems / pageSize))
+  const safePageIndex = Math.min(pageIndex, pageCount - 1)
+  const start = totalItems === 0 ? 0 : safePageIndex * pageSize + 1
+  const end = Math.min(start + pageSize - 1, totalItems)
+  const paginatedClients = filtered.slice(safePageIndex * pageSize, safePageIndex * pageSize + pageSize)
+
+  const canPreviousPage = safePageIndex > 0
+  const canNextPage = safePageIndex < pageCount - 1
+
+  const goToPage = (idx) => setPageIndex(Math.max(0, Math.min(idx, pageCount - 1)))
+  const previousPage = () => goToPage(safePageIndex - 1)
+  const nextPage = () => goToPage(safePageIndex + 1)
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize)
+    setPageIndex(0)
+  }
 
   const openCreate = () => {
     setEditId(null)
@@ -75,14 +122,40 @@ const Page = () => {
     }
   }
 
-  const filtered = query.trim()
-    ? clients.filter(
-        (c) =>
-          c.name?.toLowerCase().includes(query.toLowerCase()) ||
-          c.contactPersonName?.toLowerCase().includes(query.toLowerCase()) ||
-          c.email?.toLowerCase().includes(query.toLowerCase())
-      )
-    : clients
+  // Build visible page numbers with ellipsis for large page counts
+  const getVisiblePages = () => {
+    const pages = []
+    const maxVisible = 5
+
+    if (pageCount <= maxVisible + 2) {
+      for (let i = 0; i < pageCount; i++) pages.push(i)
+      return pages
+    }
+
+    // Always show first page
+    pages.push(0)
+
+    let rangeStart = Math.max(1, safePageIndex - 1)
+    let rangeEnd = Math.min(pageCount - 2, safePageIndex + 1)
+
+    // Adjust range to always show at least 3 middle pages
+    if (rangeEnd - rangeStart < 2) {
+      if (rangeStart <= 1) {
+        rangeEnd = Math.min(pageCount - 2, rangeStart + 2)
+      } else {
+        rangeStart = Math.max(1, rangeEnd - 2)
+      }
+    }
+
+    if (rangeStart > 1) pages.push('ellipsis-start')
+    for (let i = rangeStart; i <= rangeEnd; i++) pages.push(i)
+    if (rangeEnd < pageCount - 2) pages.push('ellipsis-end')
+
+    // Always show last page
+    pages.push(pageCount - 1)
+
+    return pages
+  }
 
   return (
     <>
@@ -137,7 +210,7 @@ const Page = () => {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((client) => (
+                {paginatedClients.map((client) => (
                   <tr key={client.id}>
                     <td className="fw-semibold">{client.name}</td>
                     <td className="text-muted">{client.contactPersonName || '—'}</td>
@@ -171,6 +244,61 @@ const Page = () => {
               </tbody>
             </Table>
           </CardBody>
+
+          <CardFooter className="border-top">
+            <Row className="align-items-center text-center text-sm-start">
+              <Col sm className="mb-2 mb-sm-0">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="text-muted">
+                    Showing <span className="fw-semibold">{start}</span> to{' '}
+                    <span className="fw-semibold">{end}</span> of{' '}
+                    <span className="fw-semibold">{totalItems}</span> clients
+                  </span>
+                  <FormSelect
+                    size="sm"
+                    style={{ width: 'auto' }}
+                    value={pageSize}
+                    onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+                  >
+                    {PAGE_SIZE_OPTIONS.map((size) => (
+                      <option key={size} value={size}>
+                        {size} / page
+                      </option>
+                    ))}
+                  </FormSelect>
+                </div>
+              </Col>
+              {pageCount > 1 && (
+                <Col sm="auto">
+                  <ul className="pagination pagination-sm pagination-boxed mb-0 justify-content-center">
+                    <li className="page-item">
+                      <button className="page-link" onClick={previousPage} disabled={!canPreviousPage}>
+                        <Icon icon="chevron-left" />
+                      </button>
+                    </li>
+                    {getVisiblePages().map((page, idx) =>
+                      typeof page === 'string' ? (
+                        <li key={page} className="page-item disabled">
+                          <span className="page-link">…</span>
+                        </li>
+                      ) : (
+                        <li key={idx} className={`page-item ${safePageIndex === page ? 'active' : ''}`}>
+                          <button className="page-link" onClick={() => goToPage(page)}>
+                            {page + 1}
+                          </button>
+                        </li>
+                      )
+                    )}
+                    <li className="page-item">
+                      <button className="page-link" onClick={nextPage} disabled={!canNextPage}>
+                        <Icon icon="chevron-right" />
+                      </button>
+                    </li>
+                  </ul>
+                </Col>
+              )}
+            </Row>
+          </CardFooter>
         </Card>
       )}
 

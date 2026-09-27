@@ -41,7 +41,7 @@ const ClientModal = ({ show, onHide, clientId, onSaved }) => {
     watch,
     setValue,
     formState: { errors },
-  } = useForm({ defaultValues: emptyForm })
+  } = useForm({ defaultValues: emptyForm, mode: 'onTouched' })
 
   const clientName = watch('name')
 
@@ -128,15 +128,22 @@ const ClientModal = ({ show, onHide, clientId, onSaved }) => {
                   Client name <span className="text-danger">*</span>
                 </Form.Label>
                 <FormControl
+                  maxLength={100}
                   {...register('name', {
                     required: 'Client name is required',
+                    validate: (v) => (v && v.trim().length > 0) || 'Client name is required',
                     minLength: { value: 2, message: 'Min 2 characters' },
                     maxLength: { value: 100, message: 'Max 100 characters' },
                   })}
                   placeholder="e.g. Acme Corp"
                   isInvalid={Boolean(errors.name)}
                 />
-                <Form.Control.Feedback type="invalid">{errors.name?.message}</Form.Control.Feedback>
+                <div className="d-flex justify-content-between align-items-center mt-1">
+                  <Form.Control.Feedback type="invalid" className="d-block m-0">{errors.name?.message}</Form.Control.Feedback>
+                  <span className={`fs-xs ms-auto ${(watch('name') || '').length >= 100 ? 'text-danger' : 'text-muted'}`}>
+                    {(watch('name') || '').length}/100
+                  </span>
+                </div>
               </Form.Group>
 
               <Form.Group className="mb-3" controlId="clientContact">
@@ -164,13 +171,19 @@ const ClientModal = ({ show, onHide, clientId, onSaved }) => {
                   />
                 </div>
                 <FormControl
+                  maxLength={100}
                   {...register('contactPersonName', { maxLength: { value: 100, message: 'Max 100 characters' } })}
                   placeholder="John Doe"
                   disabled={sameAsName}
                   value={sameAsName ? clientName || '' : undefined}
                   isInvalid={Boolean(errors.contactPersonName)}
                 />
-                <Form.Control.Feedback type="invalid">{errors.contactPersonName?.message}</Form.Control.Feedback>
+                <div className="d-flex justify-content-between align-items-center mt-1">
+                  <Form.Control.Feedback type="invalid" className="d-block m-0">{errors.contactPersonName?.message}</Form.Control.Feedback>
+                  <span className={`fs-xs ms-auto ${(watch('contactPersonName') || '').length >= 100 ? 'text-danger' : 'text-muted'}`}>
+                    {(watch('contactPersonName') || '').length}/100
+                  </span>
+                </div>
               </Form.Group>
 
               <Row>
@@ -180,7 +193,10 @@ const ClientModal = ({ show, onHide, clientId, onSaved }) => {
                     <FormControl
                       type="email"
                       {...register('email', {
-                        pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Invalid email' },
+                        validate: (v) => {
+                          if (!v || !v.trim()) return true
+                          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) || 'Enter a valid email address'
+                        },
                       })}
                       placeholder="contact@acme.com"
                       isInvalid={Boolean(errors.email)}
@@ -218,6 +234,7 @@ const ClientModal = ({ show, onHide, clientId, onSaved }) => {
                   {...register('notes', { maxLength: { value: 500, message: 'Max 500 characters' } })}
                   placeholder="Internal notes about this client..."
                   isInvalid={Boolean(errors.notes)}
+                  style={{ resize: 'vertical', maxHeight: 200 }}
                 />
                 <div className="d-flex justify-content-between align-items-center mt-1">
                   <Form.Control.Feedback type="invalid" className="d-block m-0">{errors.notes?.message}</Form.Control.Feedback>

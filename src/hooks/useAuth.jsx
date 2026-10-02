@@ -9,7 +9,7 @@ import {
 } from '@/lib/apiClient'
 import { authService } from '@/services/authService'
 import { createContext, use, useCallback, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useLocation, useNavigate } from 'react-router'
 
 const AuthContext = createContext(undefined)
 
@@ -38,6 +38,7 @@ const applyAuthResult = (data) => {
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate()
+  const location = useLocation()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [token, setTokenState] = useState(() => getAccessToken())
@@ -62,7 +63,10 @@ export const AuthProvider = ({ children }) => {
           return data
         }
 
-        navigate('/app/dashboard', { replace: true })
+        const returnTo = typeof location.state?.from === 'string' && location.state.from.startsWith('/app/')
+          ? location.state.from
+          : '/app/dashboard'
+        navigate(returnTo, { replace: true })
         return data
       } catch (err) {
         setError(err.message || 'Login failed')
@@ -71,7 +75,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false)
       }
     },
-    [navigate, syncFromStorage]
+    [location.state, navigate, syncFromStorage]
   )
 
   const register = useCallback(

@@ -21,7 +21,7 @@ const AppGate = ({ children }) => {
     if (!isAuthenticated && !publicRoute) {
       navigate('/auth/sign-in', {
         replace: true,
-        state: { from: location.pathname },
+        state: { from: `${location.pathname}${location.search}` },
       })
       return
     }

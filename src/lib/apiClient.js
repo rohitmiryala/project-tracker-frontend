@@ -125,9 +125,9 @@ const refreshAccessToken = async () => {
 
 /**
  * @param {string} path - e.g. '/auth/login'
- * @param {{ method?: string, body?: object, auth?: boolean, headers?: Record<string,string> }} options
+ * @param {{ method?: string, body?: object, auth?: boolean, headers?: Record<string,string>, responseType?: 'json' | 'blob' }} options
  */
-export const apiRequest = async (path, { method = 'GET', body, auth = false, headers = {} } = {}) => {
+export const apiRequest = async (path, { method = 'GET', body, auth = false, headers = {}, responseType = 'json' } = {}) => {
   const url = `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`
   const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
 
@@ -164,6 +164,7 @@ export const apiRequest = async (path, { method = 'GET', body, auth = false, hea
   }
 
   if (response.status === 204) return null
+  if (responseType === 'blob') return response.blob()
   return response.json()
 }
 

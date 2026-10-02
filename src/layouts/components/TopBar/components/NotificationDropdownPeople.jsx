@@ -1,166 +1,142 @@
-import User4 from '@/assets/images/users/user-4.jpg'
-import User5 from '@/assets/images/users/user-5.jpg'
-import User6 from '@/assets/images/users/user-6.jpg'
-import User7 from '@/assets/images/users/user-7.jpg'
-import User8 from '@/assets/images/users/user-8.jpg'
 import Icon from '@/components/wrappers/Icon'
 import { SimpleBar } from '@/components/wrappers/SimpleBar'
-import { Col, Dropdown, DropdownItem, DropdownMenu, DropdownToggle, Row } from 'react-bootstrap'
-import { Link } from 'react-router'
-const notifications = [
-  {
-    id: 'message-1',
-    name: 'Emily Johnson',
-    message: 'commented on a task in',
-    project: 'Design Sprint',
-    time: '12 minutes ago',
-    avatarType: 'image',
-    avatarSrc: User4,
-    badgeBg: 'bg-success',
-    badgeIcon: 'bell',
-    badgeLabel: 'unread notification',
-  },
-  {
-    id: 'message-2',
-    name: 'Michael Lee',
-    message: 'uploaded files to',
-    project: 'Marketing Assets',
-    time: '25 minutes ago',
-    avatarType: 'image',
-    avatarSrc: User5,
-    badgeBg: 'bg-info',
-    badgeIcon: 'cloud-upload',
-    badgeLabel: 'upload notification',
-  },
-  {
-    id: 'message-6',
-    name: 'Server #3',
-    message: 'CPU usage exceeded 90%',
-    project: '',
-    time: 'Just now',
-    avatarType: 'icon',
-    icon: 'database',
-    avatarBg: 'bg-light',
-    badgeBg: 'bg-danger',
-    badgeIcon: 'alert-circle',
-    badgeLabel: 'server alert',
-  },
-  {
-    id: 'message-3',
-    name: 'Sophia Ray',
-    message: 'flagged an issue in',
-    project: 'Bug Tracker',
-    time: '40 minutes ago',
-    avatarType: 'image',
-    avatarSrc: User6,
-    badgeBg: 'bg-warning',
-    badgeIcon: 'alert-triangle',
-    badgeLabel: 'alert',
-  },
-  {
-    id: 'message-4',
-    name: 'David Kim',
-    message: 'scheduled a meeting for',
-    project: 'UX Review',
-    time: '1 hour ago',
-    avatarType: 'image',
-    avatarSrc: User7,
-    badgeBg: 'bg-primary',
-    badgeIcon: 'calendar-event',
-    badgeLabel: 'event notification',
-  },
-  {
-    id: 'message-5',
-    name: 'Isabella White',
-    message: 'updated the document in',
-    project: 'Product Specs',
-    time: '2 hours ago',
-    avatarType: 'image',
-    avatarSrc: User8,
-    badgeBg: 'bg-secondary',
-    badgeIcon: 'edit',
-    badgeLabel: 'edit',
-  },
-  {
-    id: 'message-7',
-    name: 'Production Server',
-    message: 'deployment completed successfully',
-    project: '',
-    time: '30 minutes ago',
-    avatarType: 'icon',
-    icon: 'rocket',
-    avatarBg: 'bg-light',
-    badgeBg: 'bg-success',
-    badgeIcon: 'check',
-    badgeLabel: 'deployment',
-  },
-]
+import { useAuth } from '@/hooks/useAuth'
+import { workService } from '@/services/workService'
+import { hasAnyPermission } from '@/utils/permissions'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownToggle, Spinner } from 'react-bootstrap'
+
+const iconByType = {
+  task_assigned: 'check-square',
+  task_overdue: 'calendar-x',
+  project_budget_warning: 'triangle-alert',
+  issue_assigned: 'circle-alert',
+  mention: 'at-sign',
+}
+
+const relativeTime = (value) => {
+  if (!value) return ''
+  const seconds = Math.round((new Date(value).getTime() - Date.now()) / 1000)
+  const formatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' })
+  const ranges = [
+    ['year', 31536000],
+    ['month', 2592000],
+    ['week', 604800],
+    ['day', 86400],
+    ['hour', 3600],
+    ['minute', 60],
+  ]
+  const [unit, divisor] = ranges.find(([, size]) => Math.abs(seconds) >= size) || ['second', 1]
+  return formatter.format(Math.round(seconds / divisor), unit)
+}
+
 const NotificationDropdown = () => {
+  const { user } = useAuth()
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [marking, setMarking] = useState(false)
+  const canLoad = hasAnyPermission(user, [
+    ['workManagement', 'view'],
+    ['projectManagement', 'view'],
+  ])
+
+  const load = useCallback(async () => {
+    if (!canLoad) return
+    setLoading(true)
+    setError('')
+    try {
+      const response = await workService.notifications()
+      setItems(response?.data || [])
+    } catch (requestError) {
+      setError(requestError.message || 'Notifications could not be loaded.')
+    } finally {
+      setLoading(false)
+    }
+  }, [canLoad])
+
+  useEffect(() => {
+    const initialLoad = window.setTimeout(load, 0)
+    const refresh = () => load()
+    window.addEventListener('velorak:work-changed', refresh)
+    return () => {
+      window.clearTimeout(initialLoad)
+      window.removeEventListener('velorak:work-changed', refresh)
+    }
+  }, [load])
+
+  const unreadCount = useMemo(() => items.filter((item) => !item.isRead).length, [items])
+
+  const markAllRead = async () => {
+    if (!unreadCount) return
+    setMarking(true)
+    try {
+      await workService.markAllNotificationsRead()
+      setItems((current) => current.map((item) => ({ ...item, isRead: true })))
+    } catch (requestError) {
+      setError(requestError.message || 'Notifications could not be updated.')
+    } finally {
+      setMarking(false)
+    }
+  }
+
+  if (!canLoad) return null
+
   return (
     <div id="notification-dropdown-people" className="topbar-item">
-      <Dropdown align="end">
-        <DropdownToggle className="topbar-link drop-arrow-none" as="button">
-          <span className="topbar-link-icon">
-            <Icon icon="bell" className="animate-ring" />
-          </span>
-          <span className="badge text-bg-danger badge-circle topbar-badge">{notifications.length}</span>
+      <Dropdown align="end" onToggle={(open) => open && load()}>
+        <DropdownToggle className="topbar-link drop-arrow-none" as="button" aria-label={`${unreadCount} unread notifications`}>
+          <span className="topbar-link-icon"><Icon icon="bell" /></span>
+          {unreadCount > 0 && <span className="badge text-bg-danger badge-circle topbar-badge">{unreadCount > 99 ? '99+' : unreadCount}</span>}
         </DropdownToggle>
 
         <DropdownMenu className="p-0 dropdown-menu-end dropdown-menu-lg">
-          <div className="px-3 py-2 border-bottom">
-            <Row className="align-items-center">
-              <Col>
-                <h6 className="m-0 fs-md fw-semibold">Notifications</h6>
-              </Col>
-              <Col className="text-end">
-                <Link to="" className="badge badge-soft-success badge-label py-1">
-                  {notifications.length.toString().padStart(2, '0')} Notifications
-                </Link>
-              </Col>
-            </Row>
+          <div className="d-flex align-items-center justify-content-between gap-3 px-3 py-2 border-bottom">
+            <div>
+              <h6 className="m-0 fs-md fw-semibold">Notifications</h6>
+              <span className="text-muted fs-xs">{unreadCount} unread</span>
+            </div>
+            <Button type="button" variant="link" size="sm" className="p-0" onClick={markAllRead} disabled={marking || unreadCount === 0}>
+              {marking ? 'Updating…' : 'Mark all read'}
+            </Button>
           </div>
 
-          <SimpleBar
-            style={{
-              maxHeight: 300,
-            }}
-          >
-            {notifications.map((notif) => (
-              <DropdownItem key={notif.id} id={notif.id} className="notification-item py-2 text-wrap">
-                <span className="d-flex align-items-center gap-3">
-                  <span className="flex-shrink-0 position-relative">
-                    {notif.avatarType === 'image' && notif.avatarSrc ? (
-                      <img src={notif.avatarSrc} alt={`${notif.name} Avatar`} className="avatar-md rounded-circle" width={48} height={48} />
-                    ) : (
-                      <span className={`avatar-md rounded-circle ${notif.avatarBg} d-flex align-items-center justify-content-center`}>{notif.icon && <Icon icon={notif.icon} className="fs-4" />}</span>
-                    )}
-
-                    <span className={`position-absolute rounded-pill ${notif.badgeBg} notification-badge`}>
-                      <Icon icon={notif.badgeIcon} className="align-middle" />
-                      <span className="visually-hidden">{notif.badgeLabel}</span>
-                    </span>
+          <SimpleBar style={{ maxHeight: 340 }}>
+            {loading && items.length === 0 && (
+              <div className="text-center py-5" role="status"><Spinner animation="border" size="sm" /><div className="text-muted fs-sm mt-2">Loading notifications…</div></div>
+            )}
+            {error && (
+              <div className="text-center p-4">
+                <p className="text-danger fs-sm mb-2">{error}</p>
+                <Button size="sm" variant="outline-danger" onClick={load}>Try again</Button>
+              </div>
+            )}
+            {!loading && !error && items.length === 0 && (
+              <div className="text-center p-5">
+                <Icon icon="bell-off" className="fs-2 text-muted mb-2" />
+                <p className="text-muted mb-0">You are all caught up.</p>
+              </div>
+            )}
+            {!error && items.map((notification) => (
+              <DropdownItem key={notification._id} as="div" className={`notification-item py-3 text-wrap ${notification.isRead ? '' : 'bg-primary-subtle'}`}>
+                <span className="d-flex align-items-start gap-3">
+                  <span className="avatar avatar-sm avatar-title rounded bg-light text-primary flex-shrink-0">
+                    <Icon icon={iconByType[notification.type] || 'bell'} />
                   </span>
-
-                  <span className="flex-grow-1 text-muted">
-                    <span className="fw-medium text-body">{notif.name}</span> {notif.message} {notif.project && <span className="fw-medium text-body">{notif.project}</span>}
-                    <br />
-                    <span className="fs-xs">{notif.time}</span>
+                  <span className="flex-grow-1 min-w-0">
+                    <span className="d-block fw-semibold text-body">{notification.title}</span>
+                    <span className="d-block text-muted fs-sm text-break">{notification.message}</span>
+                    <span className="d-block text-muted fs-xs mt-1">{relativeTime(notification.createdAt)}</span>
                   </span>
-
-                  <button type="button" className="flex-shrink-0 text-muted btn btn-link p-0 position-absolute end-0 me-2 d-none noti-close-btn" data-dismissible={`#${notif.id}`}>
-                    <Icon icon="x-square" className="fs-xxl" />
-                  </button>
+                  {!notification.isRead && <span className="rounded-circle bg-primary mt-2" style={{ width: 7, height: 7 }} aria-label="Unread" />}
                 </span>
               </DropdownItem>
             ))}
           </SimpleBar>
-
-          <DropdownItem href="" className="text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2">
-            Read All Messages
-          </DropdownItem>
         </DropdownMenu>
       </Dropdown>
     </div>
   )
 }
+
 export default NotificationDropdown

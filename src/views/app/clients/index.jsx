@@ -1,10 +1,13 @@
 import PageBreadcrumb from '@/components/PageBreadcrumb'
 import Icon from '@/components/wrappers/Icon'
 import { useNotificationContext } from '@/context/useNotificationContext'
+import { useAuth } from '@/hooks/useAuth'
 import { clientService } from '@/services/clientService'
+import { hasPermission } from '@/utils/permissions'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Button,
+  Alert,
   Card,
   CardBody,
   CardFooter,
@@ -26,10 +29,12 @@ import ClientModal from './components/ClientModal'
 const PAGE_SIZE_OPTIONS = [5, 10, 15, 25]
 
 const Page = () => {
+  const { user } = useAuth()
   const { showNotification } = useNotificationContext()
   const [query, setQuery] = useState('')
   const [clients, setClients] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editId, setEditId] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -43,18 +48,25 @@ const Page = () => {
 
   const loadClients = useCallback(async () => {
     setLoading(true)
+    setError('')
     try {
       const json = await clientService.list()
       setClients(json?.data || [])
     } catch (err) {
+      setError(err.message || 'Could not load clients')
       showNotification({ title: 'Clients', message: err.message || 'Could not load clients', variant: 'danger' })
     } finally {
       setLoading(false)
     }
   }, [showNotification])
 
+  const canCreate = hasPermission(user, 'clientManagement', 'create')
+  const canEdit = hasPermission(user, 'clientManagement', 'edit')
+  const canDelete = hasPermission(user, 'clientManagement', 'delete')
+
   useEffect(() => {
-    loadClients()
+    const timer = window.setTimeout(loadClients, 0)
+    return () => window.clearTimeout(timer)
   }, [loadClients])
 
   // Filter clients by search query
@@ -68,11 +80,6 @@ const Page = () => {
         c.email?.toLowerCase().includes(q)
     )
   }, [clients, query])
-
-  // Reset to first page when search or data changes
-  useEffect(() => {
-    setPageIndex(0)
-  }, [query, clients])
 
   // Pagination derived values
   const totalItems = filtered.length
@@ -167,14 +174,16 @@ const Page = () => {
             type="search"
             placeholder="Search clients..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setPageIndex(0) }}
           />
           <Icon icon="search" className="app-search-icon text-muted" />
         </div>
-        <Button variant="primary" className="text-nowrap" onClick={openCreate}>
-          <Icon icon="plus" className="me-1" /> Add Client
-        </Button>
+        {canCreate && <Button variant="primary" className="text-nowrap" onClick={openCreate}>
+            <Icon icon="plus" className="me-1" /> Add Client
+          </Button>}
       </div>
+
+      {error && <Alert variant="danger" className="d-flex justify-content-between align-items-center"><span>{error}</span><Button size="sm" variant="outline-danger" onClick={loadClients}>Retry</Button></Alert>}
 
       {loading && (
         <div className="text-center py-5">
@@ -182,7 +191,7 @@ const Page = () => {
         </div>
       )}
 
-      {!loading && filtered.length === 0 && (
+      {!loading && !error && filtered.length === 0 && (
         <Card>
           <CardBody className="text-center py-5">
             <Icon icon="building-2" className="text-muted mb-2" style={{ width: 48, height: 48 }} />
@@ -212,7 +221,12 @@ const Page = () => {
               <tbody>
                 {paginatedClients.map((client) => (
                   <tr key={client.id}>
-                    <td className="fw-semibold">{client.name}</td>
+                    <td className="fw-semibold">
+                      <span className="d-inline-flex align-items-center gap-2">
+                        {client.name}
+                        {client.isSample && <span className="badge bg-primary-subtle text-primary">Sample</span>}
+                      </span>
+                    </td>
                     <td className="text-muted">{client.contactPersonName || '—'}</td>
                     <td className="text-muted">{client.email || '—'}</td>
                     <td>{client.currency || '—'}</td>
@@ -221,23 +235,22 @@ const Page = () => {
                         type="switch"
                         id={`status-${client.id}`}
                         checked={client.isActive}
-                        onChange={() => setToggleTarget(client)}
+                        onChange={() => canEdit && setToggleTarget(client)}
+                        disabled={!canEdit}
                         label={client.isActive ? 'Active' : 'Inactive'}
                         className="d-inline-block"
                       />
                     </td>
                     <td className="text-end">
-                      <Dropdown align="end">
+                      {(canEdit || canDelete) && <Dropdown align="end">
                         <DropdownToggle as="button" className="btn btn-sm btn-soft-secondary drop-arrow-none">
                           <Icon icon="ellipsis" />
                         </DropdownToggle>
                         <DropdownMenu>
-                          <DropdownItem onClick={() => openEdit(client.id)}>Edit client</DropdownItem>
-                          <DropdownItem className="text-danger" onClick={() => confirmDelete(client)}>
-                            Delete client
-                          </DropdownItem>
+                          {canEdit && <DropdownItem onClick={() => openEdit(client.id)}>Edit client</DropdownItem>}
+                          {canDelete && <DropdownItem className="text-danger" onClick={() => confirmDelete(client)}>Delete client</DropdownItem>}
                         </DropdownMenu>
-                      </Dropdown>
+                      </Dropdown>}
                     </td>
                   </tr>
                 ))}
@@ -302,7 +315,7 @@ const Page = () => {
         </Card>
       )}
 
-      <ClientModal show={modalOpen} clientId={editId} onHide={() => setModalOpen(false)} onSaved={loadClients} />
+      {(canCreate || canEdit) && <ClientModal show={modalOpen} clientId={editId} onHide={() => setModalOpen(false)} onSaved={loadClients} />}
 
       <Modal show={Boolean(deleteTarget)} onHide={cancelDelete} centered>
         <Modal.Header closeButton>

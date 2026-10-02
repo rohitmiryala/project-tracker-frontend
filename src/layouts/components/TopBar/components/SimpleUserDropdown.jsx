@@ -11,9 +11,8 @@ const getUserDisplayName = (user) => {
 }
 
 const UserDropdown = () => {
-  const { logout } = useAuth()
-  const { user } = useAuth();
-  const userDisplayName = getUserDisplayName(user);
+  const { logout, user } = useAuth()
+  const userDisplayName = getUserDisplayName(user)
 
   const handleLogout = (e) => {
     e.preventDefault()
@@ -38,16 +37,6 @@ const UserDropdown = () => {
           <DropdownItem as={Link} to="/app/profile">
             <Icon icon="circle-user-round" className="me-1 fs-lg align-middle" />
             <span className="align-middle">Profile</span>
-          </DropdownItem>
-
-          <DropdownItem as={Link} to="/app/settings">
-            <Icon icon="bolt" className="me-1 fs-lg align-middle" />
-            <span className="align-middle">Account Settings</span>
-          </DropdownItem>
-
-          <DropdownItem as={Link} to="/pages/faq">
-            <Icon icon="headset" className="me-1 fs-lg align-middle" />
-            <span className="align-middle">Support Center</span>
           </DropdownItem>
 
           <DropdownDivider />

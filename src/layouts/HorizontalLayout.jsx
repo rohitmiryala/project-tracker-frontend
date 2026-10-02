@@ -1,4 +1,3 @@
-import Footer from '@/layouts/components/Footer'
 import TopBar from '@/layouts/components/TopBar'
 import { Container } from 'react-bootstrap'
 import ResponsiveNav from './components/ResponsiveNav'

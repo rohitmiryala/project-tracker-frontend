@@ -400,6 +400,7 @@ export const WorkView = ({ project }) => {
   const [error, setError] = useState("");
   const [modal, setModal] = useState(null);
   const [editingWorkstream, setEditingWorkstream] = useState(null);
+  const [deliverableWorkstreamId, setDeliverableWorkstreamId] = useState("");
   const [filters, setFilters] = useState({
     search: "",
     status: "",
@@ -493,6 +494,7 @@ export const WorkView = ({ project }) => {
     if (!["deliverable", "workstream"].includes(createAction)) return undefined;
     const timer = window.setTimeout(() => {
       setEditingWorkstream(null);
+      if (createAction === "deliverable") setDeliverableWorkstreamId("");
       setModal(createAction);
       setSearchParams(
         (current) => {
@@ -538,6 +540,10 @@ export const WorkView = ({ project }) => {
   const hasWorkstreams = groups.some(
     (group) => group.groupKey !== "unassigned",
   );
+  const openDeliverableModal = (workstreamId = "") => {
+    setDeliverableWorkstreamId(workstreamId || "");
+    setModal("deliverable");
+  };
 
   const saveWorkstream = async (values) => {
     const payload = {
@@ -728,7 +734,7 @@ export const WorkView = ({ project }) => {
             >
               Add Workstream
             </Button>
-            <Button onClick={() => setModal("deliverable")}>
+            <Button onClick={() => openDeliverableModal()}>
               <Icon icon="plus" className="me-1" />
               Add Deliverable
             </Button>
@@ -868,7 +874,7 @@ export const WorkView = ({ project }) => {
             <p>Define the first outcome this project must produce.</p>
           </div>
           {can(user, "workManagement", "create") && (
-            <Button onClick={() => setModal("deliverable")}>
+            <Button onClick={() => openDeliverableModal()}>
               Create Deliverable
             </Button>
           )}
@@ -884,9 +890,13 @@ export const WorkView = ({ project }) => {
         <DeliverableKanban
           groups={visibleGroups}
           groupPages={groupPages}
+          members={project.assignedEmployees || []}
+          cycles={cycles}
+          canCreate={can(user, "workManagement", "create")}
           canEdit={can(user, "workManagement", "edit")}
           canMove={canMoveDeliverables}
           movingId={movingDeliverableId}
+          onCreate={(workstreamId) => openDeliverableModal(workstreamId)}
           onEdit={(group) => {
             setEditingWorkstream(group);
             setModal("workstream");
@@ -1028,11 +1038,14 @@ export const WorkView = ({ project }) => {
         defaultValues={{
           title: "",
           description: "",
-          workstreamId: "",
+          workstreamId: deliverableWorkstreamId,
           priority: "medium",
           estimatedHours: "",
         }}
-        onClose={() => setModal(null)}
+        onClose={() => {
+          setModal(null);
+          setDeliverableWorkstreamId("");
+        }}
         onSubmit={createDeliverable}
       />
       <DeliverableDrawer

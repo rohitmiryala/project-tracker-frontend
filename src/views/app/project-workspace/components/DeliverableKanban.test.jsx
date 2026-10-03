@@ -24,7 +24,7 @@ vi.mock("@hello-pangea/dnd", () => ({
       {
         innerRef: vi.fn(),
         draggableProps: {},
-        dragHandleProps: { tabIndex: 0 },
+        dragHandleProps: { tabIndex: 0, role: "button" },
       },
       { isDragging: false },
     ),
@@ -75,9 +75,11 @@ const renderBoard = (overrides = {}) => {
         error: "",
       },
     },
+    canCreate: true,
     canEdit: true,
     canMove: true,
     movingId: "",
+    onCreate: vi.fn(),
     onEdit: vi.fn(),
     onLoad: vi.fn(),
     onMove: vi.fn(),
@@ -137,6 +139,30 @@ describe("DeliverableKanban", () => {
     expect(props.onMove).toHaveBeenCalledTimes(1);
   });
 
+  it("opens column-aware creation from Workstream and Unassigned actions", async () => {
+    const user = userEvent.setup();
+    const props = renderBoard();
+
+    screen.getAllByRole("button", { name: "Add Deliverable" }).forEach(
+      (button) => {
+        expect(button).toHaveClass("btn-primary");
+        expect(button).not.toHaveClass("btn-outline-secondary");
+      },
+    );
+
+    await user.click(
+      screen.getByRole("button", {
+        name: "Add Deliverable to Shopping experience",
+      }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Add Deliverable to Unassigned" }),
+    );
+
+    expect(props.onCreate).toHaveBeenNthCalledWith(1, "shopping");
+    expect(props.onCreate).toHaveBeenNthCalledWith(2, null);
+  });
+
   it("loads a populated column when it enters the horizontal viewport", () => {
     const originalObserver = globalThis.IntersectionObserver;
     let notifyIntersection;
@@ -154,6 +180,38 @@ describe("DeliverableKanban", () => {
 
     act(() => notifyIntersection([{ isIntersecting: true }]));
     expect(props.onLoad).toHaveBeenCalledWith("shopping");
+    globalThis.IntersectionObserver = originalObserver;
+  });
+
+  it("loads the next batch once when the card sentinel enters view", () => {
+    const originalObserver = globalThis.IntersectionObserver;
+    let notifyIntersection;
+    globalThis.IntersectionObserver = class {
+      constructor(callback, options) {
+        if (options?.rootMargin?.includes("160px")) notifyIntersection = callback;
+      }
+
+      observe() {}
+
+      disconnect() {}
+    };
+    const props = renderBoard({
+      groupPages: {
+        shopping: {
+          items: [item],
+          total: 13,
+          hasMore: true,
+          loading: false,
+          error: "",
+        },
+      },
+    });
+
+    act(() => notifyIntersection([{ isIntersecting: true }]));
+    act(() => notifyIntersection([{ isIntersecting: true }]));
+
+    expect(props.onLoad).toHaveBeenCalledTimes(1);
+    expect(props.onLoad).toHaveBeenCalledWith("shopping", 1);
     globalThis.IntersectionObserver = originalObserver;
   });
 

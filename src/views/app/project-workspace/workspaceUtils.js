@@ -12,10 +12,16 @@ export const formatCurrency = (value, currency = 'INR') => new Intl.NumberFormat
 
 export const can = (user, module, action) => user?.membershipType === 'admin' || user?.permissions?.[module]?.[action] === true
 
-export const memberOptions = (project) => (project.assignedEmployees || []).map((member) => ({
-  value: member.id,
-  label: member.fullName || 'Unnamed member',
-}))
+export const memberOptions = (project) => (project.assignedEmployees || [])
+  .map((member) => {
+    const value = member.employeeId?._id || member.employeeId || member.id || member._id
+    if (!value) return null
+    return {
+      value: String(value),
+      label: member.fullName || 'Unnamed member',
+    }
+  })
+  .filter(Boolean)
 
 export const setApiFieldErrors = (error, setError) => {
   let mapped = false

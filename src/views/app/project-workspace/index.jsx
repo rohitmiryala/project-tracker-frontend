@@ -68,7 +68,12 @@ const workstreamSchema = z
   .object({
     name: z.string().trim().min(2, "Enter at least 2 characters").max(150),
     description: optionalText(500),
-    ownerId: z.string(),
+    ownerId: z
+      .string()
+      .refine(
+        (value) => !value || /^[a-fA-F0-9]{24}$/.test(value),
+        "Choose a valid owner",
+      ),
     status: z.enum(["planned", "active", "on_hold", "completed", "cancelled"]),
     priority: z.enum(priorities),
     color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Choose a valid color"),

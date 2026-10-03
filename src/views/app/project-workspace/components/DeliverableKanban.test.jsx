@@ -111,6 +111,31 @@ describe("DeliverableKanban", () => {
       screen.getByRole("button", { name: "Open Product catalog" }),
     );
     expect(props.onOpen).toHaveBeenCalledWith("deliverable-1");
+    expect(
+      screen.getByRole("button", { name: "Open Product catalog" }),
+    ).toHaveAttribute("title", "Product catalog");
+  });
+
+  it("sizes the desktop board to show four columns at once", () => {
+    renderBoard({
+      groups: [
+        ...groups,
+        {
+          _id: "fulfilment",
+          groupKey: "fulfilment",
+          name: "Fulfilment",
+          total: 0,
+        },
+      ],
+    });
+
+    const board = screen.getByRole("region", {
+      name: "Deliverables grouped by Workstream",
+    });
+    expect(board).toHaveAttribute("data-column-count", "4");
+    expect(board).toHaveStyle(
+      "--kanban-column-width: calc((100% - 3rem) / 4)",
+    );
   });
 
   it("reports cross-column drops and ignores same-column drops", () => {

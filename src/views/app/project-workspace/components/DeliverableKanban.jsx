@@ -124,6 +124,7 @@ const DeliverableCard = ({
             className="deliverable-kanban__open"
             onClick={() => onOpen(item._id)}
             aria-label={`Open ${item.title}`}
+            title={item.title}
           >
             <strong className="text-break">{item.title}</strong>
             <span className="deliverable-kanban__meta">
@@ -400,7 +401,7 @@ const DeliverableKanban = ({
   onOpen,
 }) => {
   const boardRef = useRef(null);
-  const visibleColumnCount = Math.min(groups.length, 3) || 1;
+  const visibleColumnCount = Math.min(groups.length, 4) || 1;
   const cycleById = useMemo(
     () => new Map(cycles.map((cycle) => [idOf(cycle), cycle])),
     [cycles],
